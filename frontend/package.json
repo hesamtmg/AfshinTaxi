@@ -1,0 +1,30 @@
+{
+  "name": "afshintaxi-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt dev --port 3001",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "nuxt": "^3.10.0",
+    "vuetify": "^3.5.0",
+    "vue": "^3.4.0",
+    "vue-router": "^4.3.0",
+    "@pinia/nuxt": "^0.5.1",
+    "pinia": "^2.1.7",
+    "@mdi/font": "^7.4.47",
+    "axios": "^1.6.0",
+    "@vueuse/nuxt": "^10.7.0",
+    "@vueuse/core": "^10.7.0"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "vite-plugin-vuetify": "^2.0.1",
+    "sass": "^1.69.0",
+    "typescript": "^5.3.0",
+    "vue-tsc": "^1.8.27"
+  }
+}
