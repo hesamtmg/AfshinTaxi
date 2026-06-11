@@ -2,9 +2,10 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  ssr: true,
 
   build: {
-    transpile: ['vuetify'],
+    transpile: ['vuetify', 'form-data'],
   },
 
   modules: [
@@ -28,7 +29,12 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3000/api',
-      googleMapsKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_KEY || '',
+    },
+  },
+
+  nitro: {
+    prerender: {
+      crawlLinks: false,
     },
   },
 

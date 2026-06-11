@@ -4,10 +4,20 @@ export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   const authStore = useAuthStore()
 
-  const api = axios.create({
+  const axiosConfig: any = {
     baseURL: config.public.apiBase,
     headers: { 'Content-Type': 'application/json' },
-  })
+  }
+  console.log('API Base URL:', axiosConfig.baseURL)
+  // Handle FormData in SSR context
+  if (process.server) {
+    axiosConfig.httpAgent = require('http').globalAgent
+    axiosConfig.httpsAgent = require('https').globalAgent
+    // Avoid FormData imports during SSR
+    axiosConfig.maxRedirects = 5
+  }
+
+  const api = axios.create(axiosConfig)
 
   // Attach token to every request
   api.interceptors.request.use((config) => {

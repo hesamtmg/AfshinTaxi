@@ -199,6 +199,9 @@
 </template>
 
 <script setup lang="ts">
+
+import 'leaflet/dist/leaflet.css'
+
 definePageMeta({ layout: 'client' })
 
 const config = useRuntimeConfig()
@@ -209,111 +212,140 @@ let map: any = null
 let pickupMarker: any = null
 let dropoffMarker: any = null
 let routePolyline: any = null
-let directionsService: any = null
 
 const activePin = ref<'pickup' | 'dropoff' | null>('pickup')
 
 onMounted(() => {
-  loadGoogleMaps()
+  loadMap()
   fetchFare()
 })
 
-const loadGoogleMaps = () => {
-  if ((window as any).google?.maps) { initMap(); return }
-  const script = document.createElement('script')
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${config.public.googleMapsKey}&libraries=places,geometry`
-  script.onload = initMap
-  document.head.appendChild(script)
-}
+const loadMap = async () => {
+    const L = await import('leaflet')
 
-const initMap = () => {
-  const google = (window as any).google
-  map = new google.maps.Map(mapRef.value, {
-    center: { lat: 35.6892, lng: 51.389 },
-    zoom: 12,
-    disableDefaultUI: false,
-    zoomControl: true,
-    mapTypeControl: false,
-    streetViewControl: false,
-    fullscreenControl: false,
-  })
-  directionsService = new google.maps.DirectionsService()
-  map.addListener('click', (e: any) => {
+
+  if (!mapRef.value) return
+  
+  // Initialize Leaflet map
+  map = L.map(mapRef.value as HTMLElement).setView([35.6892, 51.389], 12)
+  
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19,
+  }).addTo(map)
+  
+  // Add click listener
+  map.on('click', (e: any) => {
     if (!activePin.value) return
-    reverseGeocode(e.latLng.lat(), e.latLng.lng(), activePin.value)
+    reverseGeocode(e.latlng.lat, e.latlng.lng, activePin.value)
   })
 }
 
-const reverseGeocode = (lat: number, lng: number, type: 'pickup' | 'dropoff') => {
-  const google = (window as any).google
-  new google.maps.Geocoder().geocode({ location: { lat, lng } }, (results: any, status: any) => {
-    if (status !== 'OK' || !results[0]) return
-    const address = results[0].formatted_address
+const reverseGeocode = async (lat: number, lng: number, type: 'pickup' | 'dropoff') => {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lang=fa&format=json&lat=${lat}&lon=${lng}`
+    )
+    const result = await response.json()
+    console.log('Reverse geocode result:', result)
+    const address = result.address?.road || result.display_name || `${lat}, ${lng}`
+    
     if (type === 'pickup') {
       form.value.pickupAddress = address
-      form.value.pickupLat = lat; form.value.pickupLng = lng
+      form.value.pickupLat = lat
+      form.value.pickupLng = lng
       setPickupMarker(lat, lng)
       activePin.value = form.value.dropoffAddress ? null : 'dropoff'
     } else {
       form.value.dropoffAddress = address
-      form.value.dropoffLat = lat; form.value.dropoffLng = lng
+      form.value.dropoffLat = lat
+      form.value.dropoffLng = lng
       setDropoffMarker(lat, lng)
       activePin.value = null
     }
+    
     if (form.value.pickupLat && form.value.dropoffLat) calculateRoute()
-  })
+  } catch (e) {
+    console.error('Reverse geocode error:', e)
+  }
 }
 
 const setPickupMarker = (lat: number, lng: number) => {
-  const google = (window as any).google
-  if (pickupMarker) pickupMarker.setMap(null)
-  pickupMarker = new google.maps.Marker({
-    position: { lat, lng }, map,
-    icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: '#4CAF50', fillOpacity: 1, strokeWeight: 2, strokeColor: '#fff' },
-    title: 'Pickup',
+  if (pickupMarker) map.removeLayer(pickupMarker)
+  
+  const greenIcon = L.divIcon({
+    className: 'pickup-marker',
+    html: '<div style="width:24px;height:24px;background:#4CAF50;border:3px solid white;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3)"></div>',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
   })
+  
+  pickupMarker = L.marker([lat, lng], { icon: greenIcon }).addTo(map)
+  pickupMarker.bindPopup('Pickup Location')
 }
 
 const setDropoffMarker = (lat: number, lng: number) => {
-  const google = (window as any).google
-  if (dropoffMarker) dropoffMarker.setMap(null)
-  dropoffMarker = new google.maps.Marker({
-    position: { lat, lng }, map,
-    icon: {
-      url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40"><path d="M16 0C7.163 0 0 7.163 0 16c0 10.627 16 24 16 24S32 26.627 32 16C32 7.163 24.837 0 16 0z" fill="#F44336"/><circle cx="16" cy="16" r="6" fill="white"/></svg>')}`,
-      scaledSize: new google.maps.Size(32, 40),
-      anchor: new google.maps.Point(16, 40),
-    },
-    title: 'Dropoff',
+  if (dropoffMarker) map.removeLayer(dropoffMarker)
+  
+  const redIcon = L.divIcon({
+    className: 'dropoff-marker',
+    html: '<div style="width:20px;height:28px;background:#F44336;border-radius:10px 10px 0 0;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);position:relative"><div style="width:8px;height:8px;background:white;border-radius:50%;position:absolute;top:6px;left:6px"></div></div>',
+    iconSize: [20, 28],
+    iconAnchor: [10, 28],
   })
+  
+  dropoffMarker = L.marker([lat, lng], { icon: redIcon }).addTo(map)
+  dropoffMarker.bindPopup('Dropoff Location')
 }
 
-const calculateRoute = () => {
-  const google = (window as any).google
-  if (routePolyline) routePolyline.setMap(null)
-  directionsService.route({
-    origin: { lat: form.value.pickupLat, lng: form.value.pickupLng },
-    destination: { lat: form.value.dropoffLat, lng: form.value.dropoffLng },
-    travelMode: google.maps.TravelMode.DRIVING,
-  }, (result: any, status: any) => {
-    if (status !== 'OK') return
-    form.value.distanceKm = result.routes[0].legs[0].distance.value / 1000
-    const path = google.maps.geometry.encoding.decodePath(result.routes[0].overview_polyline)
-    routePolyline = new google.maps.Polyline({ path, geodesic: true, strokeColor: '#F5A623', strokeOpacity: 0.9, strokeWeight: 4, map })
-    fitBounds()
-  })
+const calculateRoute = async () => {
+  try {
+    if (routePolyline) map.removeLayer(routePolyline)
+    
+    // Use OSRM (Open Source Routing Machine) for route calculation
+    const url = `https://router.project-osrm.org/route/v1/driving/${form.value.pickupLng},${form.value.pickupLat};${form.value.dropoffLng},${form.value.dropoffLat}?overview=full&geometries=geojson`
+    
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    if (data.routes && data.routes.length > 0) {
+      const route = data.routes[0]
+      const distance = route.distance / 1000 // Convert to km
+      form.value.distanceKm = parseFloat(distance.toFixed(2))
+      
+      // Draw polyline
+      const coordinates = route.geometry.coordinates
+      const latlngs = coordinates.map((coord: number[]) => [coord[1], coord[0]])
+      
+      routePolyline = L.polyline(latlngs, {
+        color: '#F5A623',
+        weight: 4,
+        opacity: 0.9,
+        dashArray: '0',
+      }).addTo(map)
+      
+      fitBounds()
+    }
+  } catch (e) {
+    console.error('Route calculation error:', e)
+  }
 }
 
 const fitBounds = () => {
-  const google = (window as any).google
-  if (!form.value.pickupLat || !form.value.dropoffLat) return
-  const bounds = new google.maps.LatLngBounds()
-  bounds.extend({ lat: form.value.pickupLat, lng: form.value.pickupLng })
-  bounds.extend({ lat: form.value.dropoffLat, lng: form.value.dropoffLng })
-  map.fitBounds(bounds, { top: 60, bottom: 60, left: 60, right: 60 })
+  if (!form.value.pickupLat || !form.value.dropoffLat || !map) return
+  
+  const bounds = L.latLngBounds(
+    [form.value.pickupLat, form.value.pickupLng],
+    [form.value.dropoffLat, form.value.dropoffLng]
+  )
+  
+  map.fitBounds(bounds, { padding: [60, 60] })
 }
 
-const setActivePin = (type: 'pickup' | 'dropoff') => { activePin.value = type }
+const setActivePin = (type: 'pickup' | 'dropoff') => {
+  activePin.value = type
+}
 
 const currentStep = ref(1)
 const submitting = ref(false)
@@ -352,35 +384,53 @@ const fetchFare = async () => {
 }
 
 const clearPickup = () => {
-  form.value.pickupAddress = ''; form.value.pickupLat = 0; form.value.pickupLng = 0
-  if (pickupMarker) pickupMarker.setMap(null)
-  if (routePolyline) routePolyline.setMap(null)
-  form.value.distanceKm = 0; activePin.value = 'pickup'
+  form.value.pickupAddress = ''
+  form.value.pickupLat = 0
+  form.value.pickupLng = 0
+  if (pickupMarker) map.removeLayer(pickupMarker)
+  if (routePolyline) map.removeLayer(routePolyline)
+  form.value.distanceKm = 0
+  activePin.value = 'pickup'
 }
 
 const clearDropoff = () => {
-  form.value.dropoffAddress = ''; form.value.dropoffLat = 0; form.value.dropoffLng = 0
-  if (dropoffMarker) dropoffMarker.setMap(null)
-  if (routePolyline) routePolyline.setMap(null)
-  form.value.distanceKm = 0; activePin.value = 'dropoff'
+  form.value.dropoffAddress = ''
+  form.value.dropoffLat = 0
+  form.value.dropoffLng = 0
+  if (dropoffMarker) map.removeLayer(dropoffMarker)
+  if (routePolyline) map.removeLayer(routePolyline)
+  form.value.distanceKm = 0
+  activePin.value = 'dropoff'
 }
 
 const submitBooking = async () => {
   submitting.value = true
   try {
-    const { data } = await $api.post('/bookings', { ...form.value, scheduledAt: new Date(form.value.scheduledAt).toISOString() })
+    const { data } = await $api.post('/bookings', { 
+      ...form.value, 
+      scheduledAt: new Date(form.value.scheduledAt).toISOString() 
+    })
     createdBookingId.value = data.id
     successDialog.value = true
-  } catch (e: any) { console.error(e) }
-  finally { submitting.value = false }
+  } catch (e: any) {
+    console.error(e)
+  }
+  finally {
+    submitting.value = false
+  }
 }
 
 const resetForm = () => {
-  successDialog.value = false; currentStep.value = 1
-  form.value = { pickupAddress: '', pickupLat: 0, pickupLng: 0, dropoffAddress: '', dropoffLat: 0, dropoffLng: 0, distanceKm: 0, scheduledAt: '', passengerCount: 1, notes: '' }
-  if (pickupMarker) pickupMarker.setMap(null)
-  if (dropoffMarker) dropoffMarker.setMap(null)
-  if (routePolyline) routePolyline.setMap(null)
+  successDialog.value = false
+  currentStep.value = 1
+  form.value = {
+    pickupAddress: '', pickupLat: 0, pickupLng: 0,
+    dropoffAddress: '', dropoffLat: 0, dropoffLng: 0,
+    distanceKm: 0, scheduledAt: '', passengerCount: 1, notes: ''
+  }
+  if (pickupMarker) map.removeLayer(pickupMarker)
+  if (dropoffMarker) map.removeLayer(dropoffMarker)
+  if (routePolyline) map.removeLayer(routePolyline)
   activePin.value = 'pickup'
 }
 </script>

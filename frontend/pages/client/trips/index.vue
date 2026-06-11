@@ -54,9 +54,9 @@
                 </div>
                 <div class="text-right">
                   <div class="text-h6 font-weight-bold text-primary">
-                    ${{ (booking.finalFare || booking.estimatedFare)?.toFixed(2) }}
+                    ${{ (booking.finalFare || booking.estimatedFare) }}
                   </div>
-                  <div class="text-caption text-grey">{{ booking.distanceKm?.toFixed(1) }} km</div>
+                  <div class="text-caption text-grey">{{ booking.distanceKm }} km</div>
                 </div>
               </div>
 
@@ -185,7 +185,7 @@
           </v-list-item>
           <v-list-item prepend-icon="mdi-map-marker-distance" density="compact">
             <template #title><span class="text-caption text-grey">Distance</span></template>
-            <template #subtitle>{{ selectedBooking.distanceKm?.toFixed(1) }} km</template>
+            <template #subtitle>{{ selectedBooking.distanceKm }} km</template>
           </v-list-item>
           <v-list-item prepend-icon="mdi-account-group" density="compact">
             <template #title><span class="text-caption text-grey">Passengers</span></template>
@@ -194,7 +194,7 @@
           <v-list-item prepend-icon="mdi-currency-usd" density="compact">
             <template #title><span class="text-caption text-grey">Fare</span></template>
             <template #subtitle class="text-primary font-weight-bold">
-              ${{ (selectedBooking.finalFare || selectedBooking.estimatedFare)?.toFixed(2) }}
+              ${{ (selectedBooking.finalFare || selectedBooking.estimatedFare) }}
               <span v-if="!selectedBooking.finalFare" class="text-grey text-caption"> (estimated)</span>
             </template>
           </v-list-item>
