@@ -8,12 +8,13 @@ export default defineNuxtPlugin((app) => {
   const vuetify = createVuetify({
     components,
     directives,
+    isRtl: true,
     theme: {
       defaultTheme: 'light',
       themes: {
         light: {
           colors: {
-            primary: '#F5A623',
+            primary: '#1a7ee9',
             secondary: '#1A1A2E',
             accent: '#E94560',
             success: '#4CAF50',

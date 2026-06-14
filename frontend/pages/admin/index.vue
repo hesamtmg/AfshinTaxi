@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="text-h5 font-weight-bold text-secondary mb-6">Dashboard</div>
+    <div class="text-h5 font-weight-bold text-secondary mb-6">داشبورد</div>
 
-    <!-- Stats Cards -->
+    <!-- کارت‌های آمار -->
     <v-row class="mb-6">
       <v-col v-for="stat in statCards" :key="stat.label" cols="12" sm="6" lg="3">
         <v-card rounded="xl" class="pa-5">
@@ -19,12 +19,12 @@
       </v-col>
     </v-row>
 
-    <!-- Recent Bookings -->
+    <!-- رزروهای اخیر -->
     <v-card rounded="xl" class="pa-0">
       <div class="pa-5 d-flex align-center justify-space-between">
-        <div class="text-h6 font-weight-bold text-secondary">Recent Bookings</div>
+        <div class="text-h6 font-weight-bold text-secondary">رزروهای اخیر</div>
         <v-btn variant="text" color="primary" to="/admin/bookings" size="small">
-          View All
+          مشاهده همه
         </v-btn>
       </div>
       <v-divider />
@@ -36,14 +36,14 @@
       >
         <template #item.status="{ item }">
           <v-chip :color="statusColor(item.status)" size="small" label>
-            {{ item.status }}
+            {{ getStatusText(item.status) }}
           </v-chip>
         </template>
         <template #item.scheduledAt="{ item }">
-          {{ new Date(item.scheduledAt).toLocaleString() }}
+          {{ new Date(item.scheduledAt).toLocaleString('fa-IR') }}
         </template>
         <template #item.estimatedFare="{ item }">
-          ${{ item.finalFare || item.estimatedFare }}
+          تومان{{ item.finalFare || item.estimatedFare }}
         </template>
         <template #item.actions="{ item }">
           <v-btn
@@ -71,40 +71,48 @@ const stats = computed(() => bookingsStore.stats)
 
 const statCards = computed(() => [
   {
-    label: 'Total Bookings',
+    label: 'کل رزروها',
     value: stats.value?.total ?? '—',
     icon: 'mdi-calendar-check',
     color: 'primary',
   },
   {
-    label: 'Pending',
+    label: 'در انتظار',
     value: stats.value?.pending ?? '—',
     icon: 'mdi-clock-outline',
     color: 'warning',
   },
   {
-    label: 'Completed',
+    label: 'تکمیل شده',
     value: stats.value?.completed ?? '—',
     icon: 'mdi-check-circle',
     color: 'success',
   },
   {
-    label: 'Revenue',
-    value: stats.value ? `$${stats.value.totalRevenue?.toFixed(0)}` : '—',
+    label: 'درآمد',
+    value: stats.value ? `تومان${stats.value.totalRevenue?.toFixed(0)}` : '—',
     icon: 'mdi-currency-usd',
     color: 'info',
   },
 ])
 
 const headers = [
-  { title: 'Customer', key: 'user.fullName' },
-  { title: 'Pickup', key: 'pickupAddress' },
-  { title: 'Dropoff', key: 'dropoffAddress' },
-  { title: 'Scheduled', key: 'scheduledAt' },
-  { title: 'Fare', key: 'estimatedFare' },
-  { title: 'Status', key: 'status' },
+  { title: 'مشتری', key: 'user.fullName' },
+  { title: 'مبدا', key: 'pickupAddress' },
+  { title: 'مقصد', key: 'dropoffAddress' },
+  { title: 'زمان', key: 'scheduledAt' },
+  { title: 'کرایه', key: 'estimatedFare' },
+  { title: 'وضعیت', key: 'status' },
   { title: '', key: 'actions', sortable: false },
 ]
+
+const getStatusText = (status: string) => ({
+  pending: 'در انتظار',
+  confirmed: 'تأیید شده',
+  in_progress: 'در حال انجام',
+  completed: 'تکمیل شده',
+  cancelled: 'لغو شده',
+}[status] || status)
 
 const statusColor = (status: string) => ({
   pending: 'warning',

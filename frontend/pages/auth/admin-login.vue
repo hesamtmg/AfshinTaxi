@@ -4,22 +4,22 @@
       <v-container style="max-width: 400px">
         <div class="text-center mb-8">
           <v-icon color="primary" size="48" class="mb-3">mdi-shield-account</v-icon>
-          <h1 class="text-h4 font-weight-bold text-white">Admin Login</h1>
-          <p class="text-body-2 text-grey mt-2">AfshinTaxi Control Panel</p>
+          <h1 class="text-h4 font-weight-bold text-white">ورود ادمین</h1>
+          <p class="text-body-2 text-grey mt-2">پنل مدیریت افشین‌تاکسی</p>
         </div>
 
         <v-card rounded="xl" class="pa-6">
           <v-form ref="form" v-model="valid" @submit.prevent="handleLogin">
             <v-text-field
               v-model="fields.email"
-              label="Email"
+              label="ایمیل"
               prepend-inner-icon="mdi-email"
               :rules="[rules.required, rules.email]"
               class="mb-3"
             />
             <v-text-field
               v-model="fields.password"
-              label="Password"
+              label="رمز عبور"
               prepend-inner-icon="mdi-lock"
               :type="showPass ? 'text' : 'password'"
               :append-inner-icon="showPass ? 'mdi-eye-off' : 'mdi-eye'"
@@ -45,7 +45,7 @@
               :loading="loading"
               :disabled="!valid"
             >
-              Sign In
+              ورود
             </v-btn>
           </v-form>
         </v-card>
@@ -66,8 +66,8 @@ const showPass = ref(false)
 const fields = reactive({ email: '', password: '' })
 
 const rules = {
-  required: (v: string) => !!v || 'Required',
-  email: (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Invalid email',
+  required: (v: string) => !!v || 'الزامی',
+  email: (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'ایمیل نامعتبر است',
 }
 
 const handleLogin = async () => {
@@ -80,7 +80,7 @@ const handleLogin = async () => {
     authStore.setAuth(data.token, data.user)
     navigateTo('/admin')
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Invalid credentials'
+    error.value = e.response?.data?.message || 'اطلاعات وارد شده صحیح نیست'
   } finally {
     loading.value = false
   }

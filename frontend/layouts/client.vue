@@ -1,21 +1,21 @@
 <template>
-  <v-app>
-    <!-- Top Navigation -->
+  <v-app style="direction: rtl !important;">
+    <!-- نوار بالایی -->
     <v-app-bar color="white" elevation="1" height="64">
       <v-container class="d-flex align-center pa-0">
         <NuxtLink to="/" class="text-decoration-none d-flex align-center">
-          <v-icon color="primary" size="28" class="mr-2">mdi-taxi</v-icon>
-          <span class="text-h6 font-weight-bold text-secondary">AfshinTaxi</span>
+          <v-icon color="primary" size="28" class="ml-2">mdi-taxi</v-icon>
+          <span class="text-h6 font-weight-bold text-secondary">افشین‌تاکسی</span>
         </NuxtLink>
 
         <v-spacer />
 
         <div v-if="authStore.isAuthenticated" class="d-flex align-center gap-2">
           <v-btn variant="text" to="/client/trips" prepend-icon="mdi-history">
-            My Trips
+            سفرهای من
           </v-btn>
           <v-btn color="primary" variant="tonal" to="/client/booking">
-            Book a Ride
+            رزرو تاکسی
           </v-btn>
           <v-menu>
             <template #activator="{ props }">
@@ -23,7 +23,7 @@
                 v-bind="props"
                 color="primary"
                 size="36"
-                class="cursor-pointer ml-2"
+                class="cursor-pointer mr-2"
               >
                 <span class="text-body-2 font-weight-bold text-white">
                   {{ authStore.user?.fullName?.charAt(0) }}
@@ -38,12 +38,12 @@
               />
               <v-divider />
               <v-list-item
-                title="Profile"
+                title="پروفایل"
                 prepend-icon="mdi-account-edit"
                 to="/client/profile"
               />
               <v-list-item
-                title="Logout"
+                title="خروج"
                 prepend-icon="mdi-logout"
                 color="error"
                 @click="logout"
@@ -53,8 +53,8 @@
         </div>
 
         <div v-else class="d-flex gap-2">
-          <v-btn variant="text" to="/auth/login">Login</v-btn>
-          <v-btn color="primary" to="/auth/register">Register</v-btn>
+          <v-btn variant="text" to="/auth/login">ورود</v-btn>
+          <v-btn color="primary" to="/auth/register">ثبت نام</v-btn>
         </div>
       </v-container>
     </v-app-bar>
@@ -63,16 +63,16 @@
       <slot />
     </v-main>
 
-    <!-- Footer -->
+    <!-- فوتر -->
     <v-footer color="secondary" class="pa-6">
       <v-container>
         <div class="d-flex align-center justify-space-between flex-wrap gap-4">
           <div class="d-flex align-center">
-            <v-icon color="primary" class="mr-2">mdi-taxi</v-icon>
-            <span class="text-white font-weight-bold">AfshinTaxi</span>
+            <v-icon color="primary" class="ml-2">mdi-taxi</v-icon>
+            <span class="text-white font-weight-bold">افشین‌تاکسی</span>
           </div>
           <span class="text-grey-lighten-1 text-body-2">
-            © {{ new Date().getFullYear() }} AfshinTaxi. All rights reserved.
+            © {{ new Date().getFullYear() }} افشین‌تاکسی. تمامی حقوق محفوظ است.
           </span>
         </div>
       </v-container>

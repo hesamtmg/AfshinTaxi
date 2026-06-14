@@ -75,7 +75,9 @@ export class AuthService {
 
   // ─── Login (Step 1: send OTP) ────────────────────────────────────────────────
   async login(dto: LoginDto) {
+
     const user = await this.userRepo.findOne({ where: { phone: dto.phone } });
+        console.log(dto.phone,user)
     if (!user || !user.isVerified) {
       throw new UnauthorizedException('Phone number not registered');
     }

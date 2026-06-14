@@ -1,12 +1,12 @@
 <template>
   <div>
     <div class="mb-6">
-      <div class="text-h5 font-weight-bold text-secondary">Settings</div>
-      <div class="text-body-2 text-grey">Configure system-wide settings</div>
+      <div class="text-h5 font-weight-bold text-secondary">تنظیمات</div>
+      <div class="text-body-2 text-grey">تنظیمات عمومی سیستم</div>
     </div>
 
     <v-row>
-      <!-- Pricing Settings -->
+      <!-- تنظیمات قیمت‌گذاری -->
       <v-col cols="12" md="6">
         <v-card rounded="xl" class="pa-6 mb-4">
           <div class="d-flex align-center gap-3 mb-5">
@@ -14,78 +14,72 @@
               <v-icon color="white">mdi-currency-usd</v-icon>
             </v-avatar>
             <div>
-              <div class="text-subtitle-1 font-weight-bold text-secondary">Pricing</div>
-              <div class="text-caption text-grey">Fare and rate configuration</div>
+              <div class="text-subtitle-1 font-weight-bold text-secondary">قیمت‌گذاری</div>
+              <div class="text-caption text-grey">تنظیمات کرایه و نرخ‌ها</div>
             </div>
           </div>
 
           <v-form @submit.prevent="savePricing">
-            <div class="text-caption text-grey font-weight-bold mb-3">BASE FARE SETTINGS</div>
+            <div class="text-caption text-grey font-weight-bold mb-3">تنظیمات کرایه پایه</div>
 
             <v-text-field
               v-model="pricing.farePerKm"
-              label="Fare Per Kilometer ($)"
+              label="کرایه به ازای هر کیلومتر (تومان)"
               type="number"
               step="0.1"
               min="0"
               prepend-inner-icon="mdi-map-marker-distance"
               variant="outlined"
               rounded="lg"
-              :hint="`Example: a 10km ride will cost $${(parseFloat(pricing.farePerKm || '0') * 10).toFixed(2)}`"
-              persistent-hint
               class="mb-4"
             />
 
             <v-text-field
               v-model="pricing.baseFare"
-              label="Base Fare ($ flat fee)"
+              label="کرایه پایه (تومان)"
               type="number"
               step="0.5"
               min="0"
               prepend-inner-icon="mdi-tag"
               variant="outlined"
               rounded="lg"
-              hint="Added to every booking regardless of distance"
-              persistent-hint
               class="mb-4"
             />
 
             <v-text-field
               v-model="pricing.minimumFare"
-              label="Minimum Fare ($)"
+              label="حداقل کرایه (تومان)"
               type="number"
               step="0.5"
               min="0"
               prepend-inner-icon="mdi-arrow-down-circle"
               variant="outlined"
               rounded="lg"
-              hint="No booking can be lower than this amount"
-              persistent-hint
               class="mb-5"
             />
 
-            <!-- Fare preview -->
+            <!-- پیش‌نمایش کرایه -->
             <v-card color="primary" variant="tonal" rounded="lg" class="pa-4 mb-5">
-              <div class="text-caption font-weight-bold text-primary mb-2">FARE PREVIEW</div>
+              <div class="text-caption font-weight-bold text-primary mb-2">پیش‌نمایش کرایه</div>
               <v-row dense>
                 <v-col v-for="ex in fareExamples" :key="ex.km" cols="4" class="text-center">
                   <div class="text-body-2 font-weight-bold text-secondary">{{ calculatedFare(ex.km) }}</div>
-                  <div class="text-caption text-grey">{{ ex.km }} km</div>
+                  <div class="text-caption text-grey">{{ ex.km }} کیلومتر</div>
                 </v-col>
               </v-row>
             </v-card>
 
-            <v-alert v-if="pricingSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="Pricing settings saved successfully." />
+            <v-alert v-if="pricingSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="تنظیمات قیمت با موفقیت ذخیره شد." />
             <v-alert v-if="pricingError" type="error" variant="tonal" rounded="lg" class="mb-3" :text="pricingError" />
 
             <v-btn type="submit" color="primary" block :loading="savingPricing" prepend-icon="mdi-content-save">
-              Save Pricing
+              ذخیره قیمت‌ها
             </v-btn>
           </v-form>
         </v-card>
       </v-col>
 
-      <!-- General Settings -->
+      <!-- تنظیمات عمومی -->
       <v-col cols="12" md="6">
         <v-card rounded="xl" class="pa-6 mb-4">
           <div class="d-flex align-center gap-3 mb-5">
@@ -93,30 +87,28 @@
               <v-icon color="white">mdi-cog</v-icon>
             </v-avatar>
             <div>
-              <div class="text-subtitle-1 font-weight-bold text-secondary">General</div>
-              <div class="text-caption text-grey">Application settings</div>
+              <div class="text-subtitle-1 font-weight-bold text-secondary">عمومی</div>
+              <div class="text-caption text-grey">تنظیمات برنامه</div>
             </div>
           </div>
 
           <v-form @submit.prevent="saveGeneral">
-            <div class="text-caption text-grey font-weight-bold mb-3">BOOKING SETTINGS</div>
+            <div class="text-caption text-grey font-weight-bold mb-3">تنظیمات رزرو</div>
 
             <v-text-field
               v-model="general.minAdvanceMinutes"
-              label="Minimum Advance Booking (minutes)"
+              label="حداقل زمان پیش‌رزرو (دقیقه)"
               type="number"
               min="0"
               prepend-inner-icon="mdi-clock-fast"
               variant="outlined"
               rounded="lg"
-              hint="How early in advance a booking must be made"
-              persistent-hint
               class="mb-4"
             />
 
             <v-text-field
               v-model="general.maxPassengers"
-              label="Max Passengers Per Booking"
+              label="حداکثر مسافر در هر رزرو"
               type="number"
               min="1"
               max="20"
@@ -127,37 +119,37 @@
             />
 
             <v-divider class="mb-4" />
-            <div class="text-caption text-grey font-weight-bold mb-3">NOTIFICATIONS</div>
+            <div class="text-caption text-grey font-weight-bold mb-3">اعلان‌ها</div>
 
             <v-switch
               v-model="general.smsOnBooking"
-              label="SMS on new booking"
+              label="پیامک برای رزرو جدید"
               color="primary"
               hide-details
               class="mb-2"
             />
             <v-switch
               v-model="general.smsOnDriverAssigned"
-              label="SMS when driver assigned"
+              label="پیامک هنگام اختصاص راننده"
               color="primary"
               hide-details
               class="mb-4"
             />
 
-            <v-alert v-if="generalSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="General settings saved." />
+            <v-alert v-if="generalSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="تنظیمات عمومی ذخیره شد." />
 
             <v-btn type="submit" color="secondary" block :loading="savingGeneral" prepend-icon="mdi-content-save">
-              Save Settings
+              ذخیره تنظیمات
             </v-btn>
           </v-form>
         </v-card>
 
-        <!-- All Settings Raw View -->
+        <!-- نمایش همه تنظیمات -->
         <v-card rounded="xl" class="pa-6">
           <div class="d-flex align-center justify-space-between mb-4">
-            <div class="text-subtitle-1 font-weight-bold text-secondary">All Settings</div>
+            <div class="text-subtitle-1 font-weight-bold text-secondary">همه تنظیمات</div>
             <v-btn size="small" variant="text" color="primary" prepend-icon="mdi-refresh" @click="loadSettings">
-              Refresh
+              بروزرسانی
             </v-btn>
           </div>
           <v-data-table
@@ -171,7 +163,7 @@
               <code class="text-primary">{{ item.value }}</code>
             </template>
             <template #item.updatedAt="{ item }">
-              <span class="text-caption text-grey">{{ new Date(item.updatedAt).toLocaleDateString() }}</span>
+              <span class="text-caption text-grey">{{ new Date(item.updatedAt).toLocaleDateString('fa-IR') }}</span>
             </template>
           </v-data-table>
         </v-card>
@@ -188,13 +180,13 @@ const { $api } = useNuxtApp()
 const allSettings = ref<any[]>([])
 const loadingSettings = ref(false)
 
-// Pricing
+// قیمت‌گذاری
 const pricing = ref({ farePerKm: '1.5', baseFare: '0', minimumFare: '3' })
 const savingPricing = ref(false)
 const pricingSuccess = ref(false)
 const pricingError = ref('')
 
-// General
+// عمومی
 const general = ref({ minAdvanceMinutes: '30', maxPassengers: '8', smsOnBooking: true, smsOnDriverAssigned: true })
 const savingGeneral = ref(false)
 const generalSuccess = ref(false)
@@ -206,13 +198,13 @@ const calculatedFare = (km: number) => {
   const perKm = parseFloat(pricing.value.farePerKm || '0')
   const min = parseFloat(pricing.value.minimumFare || '0')
   const fare = Math.max(base + km * perKm, min)
-  return `$${fare.toFixed(2)}`
+  return `${fare.toLocaleString()} تومان`
 }
 
 const settingsHeaders = [
-  { title: 'Key', key: 'key', sortable: true },
-  { title: 'Value', key: 'value', sortable: false },
-  { title: 'Updated', key: 'updatedAt', sortable: true },
+  { title: 'کلید', key: 'key', sortable: true },
+  { title: 'مقدار', key: 'value', sortable: false },
+  { title: 'تاریخ بروزرسانی', key: 'updatedAt', sortable: true },
 ]
 
 onMounted(loadSettings)
@@ -241,15 +233,15 @@ const savePricing = async () => {
   savingPricing.value = true; pricingSuccess.value = false; pricingError.value = ''
   try {
     await Promise.all([
-      saveSetting('fare_per_km', pricing.value.farePerKm, 'Fare charged per kilometer'),
-      saveSetting('base_fare', pricing.value.baseFare, 'Flat base fare per booking'),
-      saveSetting('minimum_fare', pricing.value.minimumFare, 'Minimum fare per booking'),
+      saveSetting('fare_per_km', pricing.value.farePerKm, 'کرایه به ازای هر کیلومتر'),
+      saveSetting('base_fare', pricing.value.baseFare, 'کرایه پایه هر سفر'),
+      saveSetting('minimum_fare', pricing.value.minimumFare, 'حداقل کرایه هر سفر'),
     ])
     pricingSuccess.value = true
     await loadSettings()
     setTimeout(() => { pricingSuccess.value = false }, 3000)
   } catch (e: any) {
-    pricingError.value = e.response?.data?.message || 'Failed to save pricing'
+    pricingError.value = e.response?.data?.message || 'ذخیره قیمت‌ها ناموفق بود'
   } finally { savingPricing.value = false }
 }
 
@@ -257,10 +249,10 @@ const saveGeneral = async () => {
   savingGeneral.value = true; generalSuccess.value = false
   try {
     await Promise.all([
-      saveSetting('min_advance_minutes', general.value.minAdvanceMinutes, 'Minimum booking advance time in minutes'),
-      saveSetting('max_passengers', general.value.maxPassengers, 'Maximum passengers allowed per booking'),
-      saveSetting('sms_on_booking', String(general.value.smsOnBooking), 'Send SMS notification on new booking'),
-      saveSetting('sms_on_driver_assigned', String(general.value.smsOnDriverAssigned), 'Send SMS when driver is assigned'),
+      saveSetting('min_advance_minutes', general.value.minAdvanceMinutes, 'حداقل زمان پیش‌رزرو به دقیقه'),
+      saveSetting('max_passengers', general.value.maxPassengers, 'حداکثر مسافر مجاز در هر رزرو'),
+      saveSetting('sms_on_booking', String(general.value.smsOnBooking), 'ارسال پیامک برای رزرو جدید'),
+      saveSetting('sms_on_driver_assigned', String(general.value.smsOnDriverAssigned), 'ارسال پیامک هنگام اختصاص راننده'),
     ])
     generalSuccess.value = true
     await loadSettings()

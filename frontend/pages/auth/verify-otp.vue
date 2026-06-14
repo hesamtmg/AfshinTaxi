@@ -4,15 +4,16 @@
       <v-container style="max-width: 420px">
         <div class="text-center mb-8">
           <v-icon color="primary" size="48" class="mb-3">mdi-message-lock</v-icon>
-          <h1 class="text-h4 font-weight-bold text-secondary">Verify Phone</h1>
+          <h1 class="text-h4 font-weight-bold text-secondary">تأیید تلفن</h1>
           <p class="text-body-2 text-grey-darken-1 mt-2">
-            Enter the 6-digit code sent to<br />
+            کد ۶ رقمی ارسال شده به<br />
             <strong>{{ authStore.pendingPhone }}</strong>
+            را وارد کنید
           </p>
         </div>
 
         <v-card rounded="xl" class="pa-6">
-          <!-- OTP Input -->
+          <!-- ورودی کد -->
           <div class="d-flex justify-center gap-2 mb-6">
             <v-text-field
               v-for="(_, i) in otpDigits"
@@ -47,7 +48,7 @@
             :disabled="otp.length < 6"
             @click="handleVerify"
           >
-            Verify & Continue
+            تأیید و ادامه
           </v-btn>
 
           <div class="text-center mt-4">
@@ -58,7 +59,7 @@
               :disabled="resendCooldown > 0"
               @click="handleResend"
             >
-              {{ resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code' }}
+              {{ resendCooldown > 0 ? `ارسال مجدد در ${resendCooldown} ثانیه` : 'ارسال مجدد کد' }}
             </v-btn>
           </div>
         </v-card>
@@ -110,7 +111,7 @@ const handleVerify = async () => {
     authStore.setAuth(data.token, data.user)
     navigateTo('/client/booking')
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Invalid code'
+    error.value = e.response?.data?.message || 'کد نامعتبر است'
   } finally {
     loading.value = false
   }

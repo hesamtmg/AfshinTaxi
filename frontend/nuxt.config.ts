@@ -3,11 +3,20 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: true,
-
+  public:
+  {
+    tomtomApiKey: process.env.NUXT_PUBLIC_TOMTOM_API_KEY,
+  },
   build: {
     transpile: ['vuetify', 'form-data'],
   },
 
+  buildModules: [
+    '@alireza-ab/vue-persian-datepicker/nuxt'
+  ],
+  css: [
+    '~/assets/css/iranyekan/fontiran.css',
+  ],
   modules: [
     '@pinia/nuxt',
     '@vueuse/nuxt',

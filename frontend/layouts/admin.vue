@@ -1,12 +1,12 @@
 <template>
-  <v-app>
+  <v-app style="direction: rtl !important;">
     <v-navigation-drawer v-model="drawer" color="secondary" width="260" permanent>
-      <!-- Logo -->
+      <!-- لوگو -->
       <div class="pa-6 d-flex align-center">
         <v-icon color="primary" size="32" class="mr-3">mdi-taxi</v-icon>
         <div>
-          <div class="text-white font-weight-bold text-h6">AfshinTaxi</div>
-          <div class="text-grey text-caption">Admin Panel</div>
+          <div class="text-white font-weight-bold text-h6">افشین‌تاکسی</div>
+          <div class="text-grey text-caption">پنل مدیریت</div>
         </div>
       </div>
 
@@ -31,7 +31,7 @@
         <div class="pa-4">
           <v-list-item
             :title="authStore.user?.fullName"
-            subtitle="Administrator"
+            subtitle="مدیر سیستم"
             prepend-icon="mdi-account-circle"
             class="text-white mb-2"
           />
@@ -42,7 +42,7 @@
             prepend-icon="mdi-logout"
             @click="logout"
           >
-            Logout
+            خروج
           </v-btn>
         </div>
       </template>
@@ -70,17 +70,17 @@ const route = useRoute()
 const drawer = ref(true)
 
 const navItems = [
-  { title: 'Dashboard', icon: 'mdi-view-dashboard', to: '/admin' },
-  { title: 'Bookings', icon: 'mdi-calendar-clock', to: '/admin/bookings' },
-  { title: 'Drivers', icon: 'mdi-car-multiple', to: '/admin/drivers' },
-  { title: 'Customers', icon: 'mdi-account-group', to: '/admin/customers' },
-  { title: 'Settings', icon: 'mdi-cog', to: '/admin/settings' },
-  { title: 'Reports', icon: 'mdi-chart-bar', to: '/admin/reports' },
+  { title: 'داشبورد', icon: 'mdi-view-dashboard', to: '/admin' },
+  { title: 'رزروها', icon: 'mdi-calendar-clock', to: '/admin/bookings' },
+  { title: 'رانندگان', icon: 'mdi-car-multiple', to: '/admin/drivers' },
+  { title: 'مشتریان', icon: 'mdi-account-group', to: '/admin/customers' },
+  { title: 'تنظیمات', icon: 'mdi-cog', to: '/admin/settings' },
+  { title: 'گزارشات', icon: 'mdi-chart-bar', to: '/admin/reports' },
 ]
 
 const pageTitle = computed(() => {
   const match = navItems.find((item) => route.path.startsWith(item.to))
-  return match?.title || 'Admin'
+  return match?.title || 'مدیریت'
 })
 
 const logout = () => {

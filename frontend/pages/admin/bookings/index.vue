@@ -2,12 +2,12 @@
   <div>
     <div class="d-flex align-center justify-space-between mb-6">
       <div>
-        <div class="text-h5 font-weight-bold text-secondary">Bookings</div>
-        <div class="text-body-2 text-grey">Manage all customer bookings</div>
+        <div class="text-h5 font-weight-bold text-secondary">رزروها</div>
+        <div class="text-body-2 text-grey">مدیریت رزروهای مشتریان</div>
       </div>
     </div>
 
-    <!-- Status filter tabs -->
+    <!-- تب‌های فیلتر وضعیت -->
     <v-card rounded="xl" class="mb-4 pa-1">
       <v-tabs v-model="statusFilter" color="primary" show-arrows>
         <v-tab v-for="tab in statusTabs" :key="tab.value" :value="tab.value" class="text-caption">
@@ -18,7 +18,7 @@
       </v-tabs>
     </v-card>
 
-    <!-- Table -->
+    <!-- جدول -->
     <v-card rounded="xl" class="pa-0">
       <v-data-table
         :headers="headers"
@@ -32,7 +32,7 @@
           <div class="pa-4 d-flex align-center gap-3">
             <v-text-field
               v-model="search"
-              placeholder="Search bookings..."
+              placeholder="جستجوی رزروها..."
               prepend-inner-icon="mdi-magnify"
               variant="outlined"
               rounded="lg"
@@ -41,7 +41,7 @@
               style="max-width:320px"
             />
             <v-spacer />
-            <v-btn variant="tonal" color="primary" prepend-icon="mdi-refresh" @click="bookingsStore.fetchAllBookings()">Refresh</v-btn>
+            <v-btn variant="tonal" color="primary" prepend-icon="mdi-refresh" @click="bookingsStore.fetchAllBookings()">بروزرسانی</v-btn>
           </div>
         </template>
 
@@ -71,8 +71,8 @@
         </template>
 
         <template #item.scheduledAt="{ item }">
-          <div class="text-body-2">{{ new Date(item.scheduledAt).toLocaleDateString() }}</div>
-          <div class="text-caption text-grey">{{ new Date(item.scheduledAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) }}</div>
+          <div class="text-body-2">{{ new Date(item.scheduledAt).toLocaleDateString('fa-IR') }}</div>
+          <div class="text-caption text-grey">{{ new Date(item.scheduledAt).toLocaleTimeString('fa-IR') }}</div>
         </template>
 
         <template #item.driver="{ item }">
@@ -80,17 +80,17 @@
             <v-icon start size="12">mdi-account</v-icon>
             {{ item.driver.fullName }}
           </v-chip>
-          <v-chip v-else size="small" color="warning" variant="tonal">Unassigned</v-chip>
+          <v-chip v-else size="small" color="warning" variant="tonal">تعیین نشده</v-chip>
         </template>
 
         <template #item.estimatedFare="{ item }">
-          <span class="font-weight-bold text-primary">${{ (item.finalFare || item.estimatedFare)?.toFixed(2) }}</span>
+          <span class="font-weight-bold text-primary">تومان{{ (item.finalFare || item.estimatedFare) }}</span>
         </template>
 
         <template #item.status="{ item }">
           <v-chip :color="statusColor(item.status)" size="small" label>
             <v-icon start size="12">{{ statusIcon(item.status) }}</v-icon>
-            {{ item.status.replace('_',' ') }}
+            {{ getStatusText(item.status) }}
           </v-chip>
         </template>
 
@@ -101,23 +101,23 @@
       </v-data-table>
     </v-card>
 
-    <!-- Detail Drawer -->
+    <!-- جزئیات (کناری) -->
     <v-navigation-drawer v-model="detailDrawer" location="right" width="460" temporary>
       <div v-if="selectedBooking" class="pa-6">
         <div class="d-flex align-center justify-space-between mb-5">
-          <div class="text-h6 font-weight-bold text-secondary">Booking Detail</div>
+          <div class="text-h6 font-weight-bold text-secondary">جزئیات رزرو</div>
           <v-btn icon="mdi-close" variant="text" @click="detailDrawer = false" />
         </div>
 
         <div class="d-flex align-center justify-space-between mb-4">
           <v-chip :color="statusColor(selectedBooking.status)" label>
             <v-icon start size="14">{{ statusIcon(selectedBooking.status) }}</v-icon>
-            {{ selectedBooking.status.replace('_',' ').toUpperCase() }}
+            {{ getStatusText(selectedBooking.status).toUpperCase() }}
           </v-chip>
           <span class="text-caption text-grey font-weight-bold">#{{ selectedBooking.id.slice(0,8).toUpperCase() }}</span>
         </div>
 
-        <div class="text-caption text-grey font-weight-bold mb-2">CUSTOMER</div>
+        <div class="text-caption text-grey font-weight-bold mb-2">مشتری</div>
         <v-card color="grey-lighten-5" rounded="lg" class="pa-4 mb-4">
           <div class="d-flex align-center gap-3">
             <v-avatar color="primary" size="44">
@@ -130,7 +130,7 @@
           </div>
         </v-card>
 
-        <div class="text-caption text-grey font-weight-bold mb-2">DRIVER</div>
+        <div class="text-caption text-grey font-weight-bold mb-2">راننده</div>
         <v-card v-if="selectedBooking.driver" color="grey-lighten-5" rounded="lg" class="pa-4 mb-4">
           <div class="d-flex align-center gap-3">
             <v-avatar color="info" size="44">
@@ -147,10 +147,10 @@
           </div>
         </v-card>
         <v-btn v-else color="primary" variant="tonal" block rounded="lg" class="mb-4" prepend-icon="mdi-account-plus" @click="openAssign(selectedBooking)">
-          Assign Driver
+          تعیین راننده
         </v-btn>
 
-        <div class="text-caption text-grey font-weight-bold mb-2">ROUTE</div>
+        <div class="text-caption text-grey font-weight-bold mb-2">مسیر</div>
         <v-card color="grey-lighten-5" rounded="lg" class="pa-4 mb-4">
           <div class="d-flex align-start gap-3">
             <div class="d-flex flex-column align-center mt-1">
@@ -167,27 +167,27 @@
 
         <v-list lines="two" density="compact" class="mb-4">
           <v-list-item prepend-icon="mdi-calendar-clock">
-            <template #title><span class="text-caption text-grey">Scheduled At</span></template>
-            <template #subtitle>{{ new Date(selectedBooking.scheduledAt).toLocaleString() }}</template>
+            <template #title><span class="text-caption text-grey">زمان رزرو</span></template>
+            <template #subtitle>{{ new Date(selectedBooking.scheduledAt).toLocaleString('fa-IR') }}</template>
           </v-list-item>
           <v-list-item prepend-icon="mdi-map-marker-distance">
-            <template #title><span class="text-caption text-grey">Distance</span></template>
-            <template #subtitle>{{ selectedBooking.distanceKm?.toFixed(1) }} km</template>
+            <template #title><span class="text-caption text-grey">مسافت</span></template>
+            <template #subtitle>{{ selectedBooking.distanceKm }} کیلومتر</template>
           </v-list-item>
           <v-list-item prepend-icon="mdi-currency-usd">
-            <template #title><span class="text-caption text-grey">Fare</span></template>
+            <template #title><span class="text-caption text-grey">کرایه</span></template>
             <template #subtitle>
-              <span class="text-primary font-weight-bold">${{ (selectedBooking.finalFare || selectedBooking.estimatedFare)?.toFixed(2) }}</span>
-              <span v-if="!selectedBooking.finalFare" class="text-caption text-grey ml-1">(est.)</span>
+              <span class="text-primary font-weight-bold">تومان{{ (selectedBooking.finalFare || selectedBooking.estimatedFare) }}</span>
+              <span v-if="!selectedBooking.finalFare" class="text-caption text-grey ml-1">(تخمینی)</span>
             </template>
           </v-list-item>
           <v-list-item v-if="selectedBooking.notes" prepend-icon="mdi-note-text">
-            <template #title><span class="text-caption text-grey">Notes</span></template>
+            <template #title><span class="text-caption text-grey">یادداشت</span></template>
             <template #subtitle>{{ selectedBooking.notes }}</template>
           </v-list-item>
         </v-list>
 
-        <div class="text-caption text-grey font-weight-bold mb-2">UPDATE STATUS</div>
+        <div class="text-caption text-grey font-weight-bold mb-2">بروزرسانی وضعیت</div>
         <div class="d-flex flex-wrap gap-2">
           <v-btn
             v-for="action in statusActions(selectedBooking.status)"
@@ -204,13 +204,13 @@
       </div>
     </v-navigation-drawer>
 
-    <!-- Assign Driver Dialog -->
+    <!-- دیالوگ تعیین راننده -->
     <v-dialog v-model="assignDialog" max-width="480">
       <v-card rounded="xl" class="pa-6">
-        <div class="text-h6 font-weight-bold text-secondary mb-1">Assign Driver</div>
-        <div class="text-body-2 text-grey mb-5">Booking #{{ assignTarget?.id?.slice(0,8).toUpperCase() }}</div>
+        <div class="text-h6 font-weight-bold text-secondary mb-1">تعیین راننده</div>
+        <div class="text-body-2 text-grey mb-5">رزرو #{{ assignTarget?.id?.slice(0,8).toUpperCase() }}</div>
 
-        <v-text-field v-model="driverSearch" placeholder="Search drivers..." prepend-inner-icon="mdi-magnify" variant="outlined" rounded="lg" hide-details density="compact" class="mb-3" />
+        <v-text-field v-model="driverSearch" placeholder="جستجوی رانندگان..." prepend-inner-icon="mdi-magnify" variant="outlined" rounded="lg" hide-details density="compact" class="mb-3" />
 
         <div style="max-height:280px;overflow-y:auto" class="mb-4">
           <v-radio-group v-model="selectedDriverId" hide-details>
@@ -231,18 +231,18 @@
                   <div class="text-body-2 font-weight-bold text-secondary">{{ driver.fullName }}</div>
                   <div class="text-caption text-grey">{{ driver.carModel }} • {{ driver.carPlate }}</div>
                 </div>
-                <v-chip size="x-small" color="success">Active</v-chip>
+                <v-chip size="x-small" color="success">فعال</v-chip>
               </div>
             </v-card>
-            <div v-if="filteredDrivers.length === 0" class="text-center pa-6 text-grey text-body-2">No active drivers found</div>
+            <div v-if="filteredDrivers.length === 0" class="text-center pa-6 text-grey text-body-2">هیچ راننده فعالی یافت نشد</div>
           </v-radio-group>
         </div>
 
-        <v-text-field v-model="finalFareInput" label="Final Fare override (optional)" prepend-inner-icon="mdi-currency-usd" type="number" variant="outlined" rounded="lg" hide-details density="compact" class="mb-5" />
+        <v-text-field v-model="finalFareInput" label="کرایه نهایی (اختیاری)" prepend-inner-icon="mdi-currency-usd" type="number" variant="outlined" rounded="lg" hide-details density="compact" class="mb-5" />
 
-        <div class="d-flex gap-3">
-          <v-btn variant="outlined" color="secondary" block @click="assignDialog = false">Cancel</v-btn>
-          <v-btn color="primary" block :loading="assigning" :disabled="!selectedDriverId" @click="doAssign">Assign Driver</v-btn>
+        <div class="d-flex gap-3" style="flex-direction: column">
+          <v-btn variant="outlined" color="secondary" block @click="assignDialog = false">لغو</v-btn>
+          <v-btn color="primary" block :loading="assigning" :disabled="!selectedDriverId" @click="doAssign">تعیین راننده</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -277,13 +277,21 @@ const loadDrivers = async () => {
 }
 
 const statusTabs = [
-  { label: 'All', value: 'all', icon: 'mdi-view-list', color: 'secondary' },
-  { label: 'Pending', value: 'pending', icon: 'mdi-clock-outline', color: 'warning' },
-  { label: 'Confirmed', value: 'confirmed', icon: 'mdi-check-circle', color: 'info' },
-  { label: 'In Progress', value: 'in_progress', icon: 'mdi-car', color: 'primary' },
-  { label: 'Completed', value: 'completed', icon: 'mdi-flag-checkered', color: 'success' },
-  { label: 'Cancelled', value: 'cancelled', icon: 'mdi-close-circle', color: 'error' },
+  { label: 'همه', value: 'all', icon: 'mdi-view-list', color: 'secondary' },
+  { label: 'در انتظار', value: 'pending', icon: 'mdi-clock-outline', color: 'warning' },
+  { label: 'تأیید شده', value: 'confirmed', icon: 'mdi-check-circle', color: 'info' },
+  { label: 'در حال انجام', value: 'in_progress', icon: 'mdi-car', color: 'primary' },
+  { label: 'تکمیل شده', value: 'completed', icon: 'mdi-flag-checkered', color: 'success' },
+  { label: 'لغو شده', value: 'cancelled', icon: 'mdi-close-circle', color: 'error' },
 ]
+
+const getStatusText = (status: string) => ({
+  pending: 'در انتظار',
+  confirmed: 'تأیید شده',
+  in_progress: 'در حال انجام',
+  completed: 'تکمیل شده',
+  cancelled: 'لغو شده',
+}[status] || status)
 
 const filteredBookings = computed(() =>
   statusFilter.value === 'all' ? bookingsStore.allBookings : bookingsStore.allBookings.filter((b) => b.status === statusFilter.value),
@@ -299,12 +307,12 @@ const statusCount = (val: string) =>
   val === 'all' ? bookingsStore.allBookings.length : bookingsStore.allBookings.filter((b) => b.status === val).length
 
 const headers = [
-  { title: 'Customer', key: 'user.fullName', sortable: true },
-  { title: 'Route', key: 'pickupAddress', sortable: false },
-  { title: 'Scheduled', key: 'scheduledAt', sortable: true },
-  { title: 'Driver', key: 'driver', sortable: false },
-  { title: 'Fare', key: 'estimatedFare', sortable: true },
-  { title: 'Status', key: 'status', sortable: true },
+  { title: 'مشتری', key: 'user.fullName', sortable: true },
+  { title: 'مسیر', key: 'pickupAddress', sortable: false },
+  { title: 'زمان', key: 'scheduledAt', sortable: true },
+  { title: 'راننده', key: 'driver', sortable: false },
+  { title: 'کرایه', key: 'estimatedFare', sortable: true },
+  { title: 'وضعیت', key: 'status', sortable: true },
   { title: '', key: 'actions', sortable: false, width: '80px' },
 ]
 
@@ -316,9 +324,9 @@ const statusIcon = (s: string) =>
 
 const statusActions = (status: string) =>
   ({
-    confirmed: [{ status: 'in_progress', label: 'Start Trip', color: 'primary' }, { status: 'cancelled', label: 'Cancel', color: 'error' }],
-    in_progress: [{ status: 'completed', label: 'Complete Trip', color: 'success' }],
-    pending: [{ status: 'cancelled', label: 'Cancel', color: 'error' }],
+    confirmed: [{ status: 'in_progress', label: 'شروع سفر', color: 'primary' }, { status: 'cancelled', label: 'لغو', color: 'error' }],
+    in_progress: [{ status: 'completed', label: 'اتمام سفر', color: 'success' }],
+    pending: [{ status: 'cancelled', label: 'لغو', color: 'error' }],
   } as any)[status] || []
 
 const openDetail = (booking: any) => { selectedBooking.value = booking; detailDrawer.value = true }

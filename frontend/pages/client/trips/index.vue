@@ -1,44 +1,43 @@
 <template>
-  <div>
+  <div >
     <div class="booking-hero pa-8 mb-6">
-      <v-container>
-        <div class="text-overline text-primary font-weight-bold mb-1">History</div>
-        <h1 class="text-h4 font-weight-bold text-secondary">My Trips</h1>
-        <p class="text-body-2 text-grey-darken-1 mt-1">All your past and upcoming bookings</p>
+      <v-container style="direction:rtl ">
+        <div class="text-overline text-primary font-weight-bold mb-1">تاریخچه</div>
+        <h1 class="text-h4 font-weight-bold text-secondary">سفرهای من</h1>
+        <p class="text-body-2 text-grey-darken-1 mt-1">تمام رزروهای گذشته و آینده شما</p>
       </v-container>
     </div>
 
-    <v-container>
-      <!-- Filter tabs -->
+    <v-container style="direction:rtl ">
+      <!-- تب‌های فیلتر -->
       <v-tabs v-model="activeTab" color="primary" class="mb-6">
         <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
           {{ tab.label }}
-          <v-chip v-if="tabCount(tab.value) > 0" size="x-small" :color="tab.color" class="ml-2">
+          <v-chip v-if="tabCount(tab.value) > 0" size="x-small" :color="tab.color" class="mr-2">
             {{ tabCount(tab.value) }}
           </v-chip>
         </v-tab>
       </v-tabs>
 
-      <!-- Loading -->
+      <!-- در حال بارگذاری -->
       <div v-if="bookingsStore.loading" class="d-flex justify-center pa-12">
         <v-progress-circular indeterminate color="primary" size="48" />
       </div>
 
-      <!-- Empty state -->
+      <!-- حالت خالی -->
       <div v-else-if="filteredBookings.length === 0" class="text-center pa-16">
         <v-icon size="72" color="grey-lighten-2" class="mb-4">mdi-calendar-blank</v-icon>
-        <div class="text-h6 text-grey mb-2">No trips found</div>
+        <div class="text-h6 text-grey mb-2">هیچ سفری یافت نشد</div>
         <div class="text-body-2 text-grey mb-6">
-          {{ activeTab === 'all' ? "You haven't made any bookings yet." : `No ${activeTab} bookings.` }}
+          {{ activeTab === 'all' ? "تاکنون هیچ رزروی انجام نداده‌اید." : `هیچ رزرو ${getTabName(activeTab)}ای وجود ندارد.` }}
         </div>
-        <v-btn color="primary" to="/client/booking" prepend-icon="mdi-plus">Book a Ride</v-btn>
+        <v-btn color="primary" to="/client/booking" prepend-icon="mdi-plus">رزرو سفر</v-btn>
       </div>
 
-      <!-- Bookings list -->
+      <!-- لیست رزروها -->
       <v-row v-else>
         <v-col v-for="booking in filteredBookings" :key="booking.id" cols="12" md="6">
           <v-card rounded="xl" class="booking-card" @click="openDetail(booking)">
-            <!-- Status bar -->
             <div class="status-bar" :style="{ background: statusGradient(booking.status) }" />
 
             <div class="pa-5">
@@ -46,21 +45,21 @@
                 <div>
                   <v-chip :color="statusColor(booking.status)" size="small" label class="mb-2">
                     <v-icon start size="14">{{ statusIcon(booking.status) }}</v-icon>
-                    {{ booking.status.replace('_', ' ').toUpperCase() }}
+                    {{ getStatusText(booking.status) }}
                   </v-chip>
                   <div class="text-caption text-grey">
                     #{{ booking.id.slice(0, 8).toUpperCase() }}
                   </div>
                 </div>
-                <div class="text-right">
+                <div class="text-left">
                   <div class="text-h6 font-weight-bold text-primary">
-                    ${{ (booking.finalFare || booking.estimatedFare) }}
+                    {{ (booking.finalFare ? booking.finalFare.toLocaleString() : booking.estimatedFare?.toLocaleString()) }} تومان 
                   </div>
-                  <div class="text-caption text-grey">{{ booking.distanceKm }} km</div>
+                  <div class="text-caption text-grey">{{ booking.distanceKm }} کیلومتر</div>
                 </div>
               </div>
 
-              <!-- Route -->
+              <!-- مسیر -->
               <div class="d-flex align-start gap-3 mb-4">
                 <div class="d-flex flex-column align-center mt-1">
                   <v-icon color="success" size="14">mdi-circle</v-icon>
@@ -79,23 +78,21 @@
 
               <v-divider class="mb-3" />
 
-              <!-- Footer info -->
+              <!-- اطلاعات پایین -->
               <div class="d-flex align-center justify-space-between">
                 <div class="d-flex align-center gap-1">
                   <v-icon size="14" color="grey">mdi-calendar-clock</v-icon>
                   <span class="text-caption text-grey">
-                    {{ new Date(booking.scheduledAt).toLocaleDateString() }}
-                    {{ new Date(booking.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                    {{ new Date(booking.scheduledAt).toLocaleDateString("fa-IR") }}
+                    {{ new Date(booking.scheduledAt).toLocaleTimeString("fa-IR") }}
                   </span>
                 </div>
 
-                <!-- Driver chip if assigned -->
                 <v-chip v-if="booking.driver" size="small" color="info" variant="tonal">
                   <v-icon start size="12">mdi-account</v-icon>
                   {{ booking.driver.fullName }}
                 </v-chip>
 
-                <!-- Cancel button for pending -->
                 <v-btn
                   v-else-if="booking.status === 'pending'"
                   size="x-small"
@@ -103,7 +100,7 @@
                   variant="tonal"
                   @click.stop="confirmCancel(booking)"
                 >
-                  Cancel
+                  لغو
                 </v-btn>
               </div>
             </div>
@@ -112,15 +109,14 @@
       </v-row>
     </v-container>
 
-    <!-- Booking Detail Drawer -->
+    <!-- جزئیات سفر (کناری) -->
     <v-navigation-drawer v-model="detailDrawer" location="right" width="420" temporary>
       <div v-if="selectedBooking" class="pa-6">
         <div class="d-flex align-center justify-space-between mb-6">
-          <div class="text-h6 font-weight-bold text-secondary">Trip Details</div>
+          <div class="text-h6 font-weight-bold text-secondary">جزئیات سفر</div>
           <v-btn icon="mdi-close" variant="text" @click="detailDrawer = false" />
         </div>
 
-        <!-- Status -->
         <v-card :color="statusColor(selectedBooking.status)" variant="tonal" rounded="lg" class="pa-4 mb-4">
           <div class="d-flex align-center gap-3">
             <v-icon :color="statusColor(selectedBooking.status)" size="32">
@@ -128,16 +124,16 @@
             </v-icon>
             <div>
               <div class="text-body-2 font-weight-bold">
-                {{ selectedBooking.status.replace('_', ' ').toUpperCase() }}
+                {{ getStatusText(selectedBooking.status).toUpperCase() }}
               </div>
-              <div class="text-caption">Booking #{{ selectedBooking.id.slice(0, 8).toUpperCase() }}</div>
+              <div class="text-caption">رزرو #{{ selectedBooking.id.slice(0, 8).toUpperCase() }}</div>
             </div>
           </div>
         </v-card>
 
-        <!-- Driver info (if assigned) -->
+        <!-- اطلاعات راننده -->
         <v-card v-if="selectedBooking.driver" color="grey-lighten-5" rounded="lg" class="pa-4 mb-4">
-          <div class="text-caption text-grey mb-2 font-weight-bold">YOUR DRIVER</div>
+          <div class="text-caption text-grey mb-2 font-weight-bold">راننده شما</div>
           <div class="d-flex align-center gap-3">
             <v-avatar color="primary" size="48">
               <v-icon color="white">mdi-account</v-icon>
@@ -161,8 +157,8 @@
           </div>
         </v-card>
 
-        <!-- Route details -->
-        <div class="text-caption text-grey mb-2 font-weight-bold">TRIP ROUTE</div>
+        <!-- جزئیات مسیر -->
+        <div class="text-caption text-grey mb-2 font-weight-bold">مسیر سفر</div>
         <v-card color="grey-lighten-5" rounded="lg" class="pa-4 mb-4">
           <div class="d-flex align-start gap-3">
             <div class="d-flex flex-column align-center mt-1">
@@ -177,29 +173,29 @@
           </div>
         </v-card>
 
-        <!-- Details list -->
+        <!-- لیست جزئیات -->
         <v-list lines="two">
           <v-list-item prepend-icon="mdi-calendar-clock" density="compact">
-            <template #title><span class="text-caption text-grey">Scheduled</span></template>
-            <template #subtitle>{{ new Date(selectedBooking.scheduledAt).toLocaleString() }}</template>
+            <template #title><span class="text-caption text-grey">زمان رزرو</span></template>
+            <template #subtitle>{{ new Date(selectedBooking.scheduledAt).toLocaleString("fa-IR") }}</template>
           </v-list-item>
           <v-list-item prepend-icon="mdi-map-marker-distance" density="compact">
-            <template #title><span class="text-caption text-grey">Distance</span></template>
-            <template #subtitle>{{ selectedBooking.distanceKm }} km</template>
+            <template #title><span class="text-caption text-grey">مسافت</span></template>
+            <template #subtitle>{{ selectedBooking.distanceKm }} کیلومتر</template>
           </v-list-item>
           <v-list-item prepend-icon="mdi-account-group" density="compact">
-            <template #title><span class="text-caption text-grey">Passengers</span></template>
-            <template #subtitle>{{ selectedBooking.passengerCount || 1 }}</template>
+            <template #title><span class="text-caption text-grey">مسافران</span></template>
+            <template #subtitle>{{ selectedBooking.passengerCount || 1 }} نفر</template>
           </v-list-item>
           <v-list-item prepend-icon="mdi-currency-usd" density="compact">
-            <template #title><span class="text-caption text-grey">Fare</span></template>
+            <template #title><span class="text-caption text-grey">کرایه</span></template>
             <template #subtitle class="text-primary font-weight-bold">
-              ${{ (selectedBooking.finalFare || selectedBooking.estimatedFare) }}
-              <span v-if="!selectedBooking.finalFare" class="text-grey text-caption"> (estimated)</span>
+              {{ (selectedBooking.finalFare ? selectedBooking.finalFare.toLocaleString() : selectedBooking.estimatedFare?.toLocaleString()) }} تومان
+              <span v-if="!selectedBooking.finalFare" class="text-grey text-caption"> (تخمینی)</span>
             </template>
           </v-list-item>
           <v-list-item v-if="selectedBooking.notes" prepend-icon="mdi-note-text" density="compact">
-            <template #title><span class="text-caption text-grey">Notes</span></template>
+            <template #title><span class="text-caption text-grey">یادداشت</span></template>
             <template #subtitle>{{ selectedBooking.notes }}</template>
           </v-list-item>
         </v-list>
@@ -212,23 +208,23 @@
           class="mt-4"
           @click="confirmCancel(selectedBooking)"
         >
-          Cancel Booking
+          لغو رزرو
         </v-btn>
       </div>
     </v-navigation-drawer>
 
-    <!-- Cancel Confirm Dialog -->
+    <!-- دیالوگ تأیید لغو -->
     <v-dialog v-model="cancelDialog" max-width="380">
       <v-card rounded="xl" class="pa-6">
         <div class="text-center mb-4">
           <v-icon color="error" size="48" class="mb-3">mdi-alert-circle</v-icon>
-          <div class="text-h6 font-weight-bold text-secondary">Cancel Booking?</div>
-          <div class="text-body-2 text-grey mt-2">This action cannot be undone.</div>
+          <div class="text-h6 font-weight-bold text-secondary">لغو رزرو؟</div>
+          <div class="text-body-2 text-grey mt-2">این عمل قابل بازگشت نیست.</div>
         </div>
-        <v-textarea v-model="cancelReason" label="Reason (optional)" rows="2" rounded="lg" variant="outlined" class="mb-4" />
+        <v-textarea v-model="cancelReason" label="دلیل (اختیاری)" rows="2" rounded="lg" variant="outlined" class="mb-4" />
         <div class="d-flex gap-3">
-          <v-btn variant="outlined" color="secondary" block @click="cancelDialog = false">Keep</v-btn>
-          <v-btn color="error" block :loading="cancelling" @click="doCancel">Cancel Ride</v-btn>
+          <v-btn variant="outlined" color="secondary" block @click="cancelDialog = false">انصراف</v-btn>
+          <v-btn color="error" block :loading="cancelling" @click="doCancel">لغو سفر</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -251,12 +247,25 @@ const cancelReason = ref('')
 const cancelling = ref(false)
 
 const tabs = [
-  { label: 'All', value: 'all', color: 'secondary' },
-  { label: 'Upcoming', value: 'pending', color: 'warning' },
-  { label: 'Confirmed', value: 'confirmed', color: 'info' },
-  { label: 'Completed', value: 'completed', color: 'success' },
-  { label: 'Cancelled', value: 'cancelled', color: 'error' },
+  { label: 'همه', value: 'all', color: 'secondary' },
+  { label: 'در انتظار', value: 'pending', color: 'warning' },
+  { label: 'تأیید شده', value: 'confirmed', color: 'info' },
+  { label: 'تکمیل شده', value: 'completed', color: 'success' },
+  { label: 'لغو شده', value: 'cancelled', color: 'error' },
 ]
+
+const getTabName = (value: string) => {
+  const tab = tabs.find(t => t.value === value)
+  return tab?.label || ''
+}
+
+const getStatusText = (status: string) => ({
+  pending: 'در انتظار',
+  confirmed: 'تأیید شده',
+  in_progress: 'در حال انجام',
+  completed: 'تکمیل شده',
+  cancelled: 'لغو شده',
+}[status] || status)
 
 const filteredBookings = computed(() => {
   if (activeTab.value === 'all') return bookingsStore.myBookings
@@ -292,7 +301,7 @@ const doCancel = async () => {
 </script>
 
 <style scoped>
-.booking-hero { background: linear-gradient(135deg, #fff8ee 0%, #ffffff 100%); border-bottom: 1px solid #f0f0f0; }
+.booking-hero { direction: ltr  !important; background: linear-gradient(135deg, #fff8ee 0%, #ffffff 100%); border-bottom: 1px solid #f0f0f0; }
 .booking-card { cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; overflow: hidden; }
 .booking-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important; }
 .status-bar { height: 4px; }

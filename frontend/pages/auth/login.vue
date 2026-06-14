@@ -4,17 +4,17 @@
       <v-container style="max-width: 420px">
         <div class="text-center mb-8">
           <v-icon color="primary" size="48" class="mb-3">mdi-taxi</v-icon>
-          <h1 class="text-h4 font-weight-bold text-secondary">Welcome Back</h1>
-          <p class="text-body-2 text-grey-darken-1 mt-2">Enter your phone to receive a login code</p>
+          <h1 class="text-h4 font-weight-bold text-secondary">خوش آمدید</h1>
+          <p class="text-body-2 text-grey-darken-1 mt-2">شماره تلفن خود را وارد کنید تا کد ورود دریافت کنید</p>
         </div>
 
         <v-card rounded="xl" class="pa-6">
           <v-form ref="form" v-model="valid" @submit.prevent="handleLogin">
             <v-text-field
               v-model="phone"
-              label="Phone Number"
+              label="شماره تلفن"
               prepend-inner-icon="mdi-phone"
-              placeholder="+98..."
+              placeholder="۰۹۱۲..."
               :rules="[rules.required, rules.phone]"
               class="mb-4"
             />
@@ -36,14 +36,14 @@
               :loading="loading"
               :disabled="!valid"
             >
-              Send Code
+              ارسال کد
             </v-btn>
           </v-form>
 
           <div class="text-center mt-4">
-            <span class="text-body-2 text-grey">Don't have an account?</span>
+            <span class="text-body-2 text-grey">حساب کاربری ندارید؟</span>
             <NuxtLink to="/auth/register" class="text-primary ml-1 font-weight-medium">
-              Register
+              ثبت نام
             </NuxtLink>
           </div>
         </v-card>
@@ -63,8 +63,8 @@ const error = ref('')
 const phone = ref('')
 
 const rules = {
-  required: (v: string) => !!v || 'Required',
-  phone: (v: string) => /^\+?[0-9]{10,15}$/.test(v) || 'Invalid phone number',
+  required: (v: string) => !!v || 'الزامی',
+  phone: (v: string) => /^\+?[0-9]{10,15}$/.test(v) || 'شماره تلفن نامعتبر است',
 }
 
 const handleLogin = async () => {
@@ -77,7 +77,7 @@ const handleLogin = async () => {
     authStore.setPendingPhone(phone.value)
     navigateTo('/auth/verify-otp')
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Login failed'
+    error.value = e.response?.data?.message || 'ورود ناموفق بود'
   } finally {
     loading.value = false
   }
