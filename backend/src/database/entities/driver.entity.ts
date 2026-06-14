@@ -5,8 +5,8 @@ import {
 import { Booking } from '../../bookings/entities/booking.entity';
 
 export enum DriverStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
+  ACTIVE    = 'active',
+  INACTIVE  = 'inactive',
   SUSPENDED = 'suspended',
 }
 
@@ -27,7 +27,7 @@ export class Driver {
   @Column({ type: 'enum', enum: DriverStatus, default: DriverStatus.ACTIVE })
   status: DriverStatus;
 
-  // Vehicle info
+  // Vehicle
   @Column()
   carModel: string;
 
@@ -45,6 +45,13 @@ export class Driver {
 
   @Column({ nullable: true })
   avatarUrl: string;
+
+  // 2FA OTP fields
+  @Column({ nullable: true, select: false })
+  otpCode: string;
+
+  @Column({ nullable: true })
+  otpExpiresAt: Date;
 
   @OneToMany(() => Booking, (booking) => booking.driver)
   bookings: Booking[];

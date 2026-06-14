@@ -1,48 +1,95 @@
 import {
   Controller, Get, Post, Patch, Delete,
-  Body, Param, Query, UseGuards,
+  Body, Param, Query, UseGuards, HttpCode,
 } from '@nestjs/common';
 import { DriversService } from './drivers.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '../database/entities/user.entity';
-import { DriverStatus } from '../database/entities/driver.entity';
-import { CreateDriverDto } from './dto/create-driver.dto';
-import { UpdateDriverDto } from './dto/update-driver.dto';
 
 @Controller('drivers')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
 export class DriversController {
   constructor(private readonly driversService: DriversService) {}
 
+  // ─── Driver Auth (public) ─────────────────────────────────────────────────
+  @Post('auth/send-otp')
+  @HttpCode(200)
+  sendOtp(@Body('phone') phone: string) {
+    return this.driversService.sendOtp(phone);
+  }
+
+  @Post('auth/verify-otp')
+  @HttpCode(200)
+  verifyOtp(@Body('phone') phone: string, @Body('otp') otp: string) {
+    return this.driversService.verifyOtp(phone, otp);
+  }
+
+  // ─── Driver: Own routes ───────────────────────────────────────────────────
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getMe(@CurrentUser() driver: any) {
+    return this.driversService.findOne(driver.id);
+  }
+
+  @Get('me/stats')
+  @UseGuards(JwtAuthGuard)
+  getMyStats(@CurrentUser() driver: any) {
+    return this.driversService.getMyStats(driver.id);
+  }
+
+  @Get('me/trips')
+  @UseGuards(JwtAuthGuard)
+  getMyTrips(@CurrentUser() driver: any) {
+    return this.driversService.getMyTrips(driver.id);
+  }
+
+  @Get('me/trips/:bookingId')
+  @UseGuards(JwtAuthGuard)
+  getMyTrip(@CurrentUser() driver: any, @Param('bookingId') bookingId: string) {
+    return this.driversService.getMyTrip(driver.id, bookingId);
+  }
+
+  // ─── Admin: CRUD ──────────────────────────────────────────────────────────
   @Post()
-  create(@Body() dto: CreateDriverDto) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  create(@Body() dto: any) {
     return this.driversService.create(dto);
   }
 
   @Get()
-  findAll(@Query('status') status?: DriverStatus) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  findAll(@Query('status') status?: string) {
     return this.driversService.findAll(status);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   findOne(@Param('id') id: string) {
     return this.driversService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateDriverDto) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  update(@Param('id') id: string, @Body() dto: any) {
     return this.driversService.update(id, dto);
   }
 
   @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body('status') status: DriverStatus) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  updateStatus(@Param('id') id: string, @Body('status') status: string) {
     return this.driversService.updateStatus(id, status);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   remove(@Param('id') id: string) {
     return this.driversService.remove(id);
   }
