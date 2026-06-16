@@ -90,7 +90,7 @@ const statCards = computed(() => [
   },
   {
     label: 'درآمد',
-    value: stats.value ? `تومان${stats.value.totalRevenue?.toFixed(0)}` : '—',
+    value: stats.value ? `تومان${stats.value.totalRevenue}` : '—',
     icon: 'mdi-currency-usd',
     color: 'info',
   },

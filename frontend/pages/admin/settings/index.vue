@@ -11,7 +11,7 @@
         <v-card rounded="xl" class="pa-6 mb-4">
           <div class="d-flex align-center gap-3 mb-5">
             <v-avatar color="primary" size="44" rounded="lg">
-              <v-icon color="white">mdi-currency-usd</v-icon>
+              <v-icon color="white">mdi-cash</v-icon>
             </v-avatar>
             <div>
               <div class="text-subtitle-1 font-weight-bold text-secondary">Pricing</div>
@@ -22,20 +22,20 @@
             <div class="text-caption text-grey font-weight-bold mb-3">BASE FARE SETTINGS</div>
             <v-text-field
               v-model="pricing.farePerKm"
-              label="Fare Per Kilometer ($)"
+              label="کرایه هر کیلومتر (تومان)"
               type="number"
               step="0.1"
               min="0"
               prepend-inner-icon="mdi-map-marker-distance"
               variant="outlined"
               rounded="lg"
-              :hint="`Example: a 10km ride costs $${(parseFloat(pricing.farePerKm||'0')*10).toFixed(2)}`"
+              :hint="`مثال: سفر ۱۰ کیلومتری: ${formatToman(parseFloat(pricing.farePerKm||'0')*10)}`"
               persistent-hint
               class="mb-4"
             />
             <v-text-field
               v-model="pricing.baseFare"
-              label="Base Fare ($ flat fee)"
+              label="کرایه پایه (تومان)"
               type="number"
               step="0.5"
               min="0"
@@ -48,7 +48,7 @@
             />
             <v-text-field
               v-model="pricing.minimumFare"
-              label="Minimum Fare ($)"
+              label="حداقل کرایه (تومان)"
               type="number"
               step="0.5"
               min="0"
@@ -221,6 +221,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatToman } from '~/utils/currency'
 definePageMeta({ layout: 'admin' })
 
 const { $api } = useNuxtApp()
@@ -228,7 +229,7 @@ const { $api } = useNuxtApp()
 const allSettings    = ref<any[]>([])
 const loadingSettings = ref(false)
 
-const pricing     = ref({ farePerKm: '1.5', baseFare: '0', minimumFare: '3' })
+const pricing     = ref({ farePerKm: '5000', baseFare: '10000', minimumFare: '20000' })
 const cancellation = ref({ deadlineMinutes: '60' })
 const driverBuffer = ref({ minutes: '60' })
 const general     = ref({ minAdvanceMinutes: '30', maxPassengers: '8', smsOnBooking: true, smsOnDriverAssigned: true })
@@ -250,7 +251,7 @@ const calculatedFare = (km: number) => {
   const base  = parseFloat(pricing.value.baseFare   || '0')
   const perKm = parseFloat(pricing.value.farePerKm  || '0')
   const min   = parseFloat(pricing.value.minimumFare || '0')
-  return `$${Math.max(base + km * perKm, min).toFixed(2)}`
+  return formatToman(Math.max(base + km * perKm, min))
 }
 
 // Show live cancellation examples based on current deadline setting
@@ -277,9 +278,9 @@ async function loadSettings() {
     const { data } = await $api.get('/settings')
     allSettings.value = data
     const get = (key: string, fb: string) => data.find((s: any) => s.key === key)?.value ?? fb
-    pricing.value.farePerKm           = get('fare_per_km', '1.5')
-    pricing.value.baseFare            = get('base_fare', '0')
-    pricing.value.minimumFare         = get('minimum_fare', '3')
+    pricing.value.farePerKm           = get('fare_per_km', '5000')
+    pricing.value.baseFare            = get('base_fare', '10000')
+    pricing.value.minimumFare         = get('minimum_fare', '20000')
     cancellation.value.deadlineMinutes = get('cancellation_deadline_minutes', '60')
     driverBuffer.value.minutes        = get('driver_buffer_minutes', '60')
     general.value.minAdvanceMinutes   = get('min_advance_minutes', '30')
@@ -298,9 +299,9 @@ const savePricing = async () => {
   savingPricing.value = true; pricingError.value = ''
   try {
     await Promise.all([
-      saveSetting('fare_per_km',   pricing.value.farePerKm,  'Fare charged per kilometer ($)'),
-      saveSetting('base_fare',     pricing.value.baseFare,   'Flat base fare per booking ($)'),
-      saveSetting('minimum_fare',  pricing.value.minimumFare,'Minimum fare per booking ($)'),
+      saveSetting('fare_per_km',   pricing.value.farePerKm,  'کرایه به ازای هر کیلومتر (تومان)'),
+      saveSetting('base_fare',     pricing.value.baseFare,   'کرایه پایه ثابت برای هر سفر (تومان)'),
+      saveSetting('minimum_fare',  pricing.value.minimumFare,'حداقل کرایه برای هر سفر (تومان)'),
     ])
     flash(pricingSuccess); await loadSettings()
   } catch (e: any) { pricingError.value = e.response?.data?.message || 'Failed to save' }

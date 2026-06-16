@@ -1,26 +1,26 @@
 <template>
   <div>
     <div class="mb-6">
-      <div class="text-h5 font-weight-bold text-secondary">گزارشات</div>
-      <div class="text-body-2 text-grey">نمای کلی رزروها، درآمد و فعالیت‌ها</div>
+      <div class="text-h5 font-weight-bold text-secondary">Reports</div>
+      <div class="text-body-2 text-grey">Overview of bookings, revenue, and activity</div>
     </div>
 
-    <!-- فیلتر بازه زمانی -->
+    <!-- Date range filter -->
     <v-card rounded="xl" class="pa-4 mb-6">
       <div class="d-flex align-center gap-3 flex-wrap">
         <v-btn-toggle v-model="period" color="primary" variant="outlined" density="compact" rounded="lg" mandatory>
-          <v-btn value="7" size="small">۷ روز اخیر</v-btn>
-          <v-btn value="30" size="small">۳۰ روز اخیر</v-btn>
-          <v-btn value="90" size="small">۹۰ روز اخیر</v-btn>
+          <v-btn value="7" size="small">Last 7 days</v-btn>
+          <v-btn value="30" size="small">Last 30 days</v-btn>
+          <v-btn value="90" size="small">Last 90 days</v-btn>
         </v-btn-toggle>
         <v-spacer />
         <v-btn variant="tonal" color="primary" prepend-icon="mdi-refresh" size="small" @click="loadData">
-          بروزرسانی
+          Refresh
         </v-btn>
       </div>
     </v-card>
 
-    <!-- کارت‌های KPI -->
+    <!-- KPI Cards -->
     <v-row class="mb-6">
       <v-col v-for="kpi in kpiCards" :key="kpi.label" cols="6" md="3">
         <v-card rounded="xl" class="pa-5">
@@ -44,10 +44,10 @@
     </v-row>
 
     <v-row>
-      <!-- رزروها بر اساس وضعیت -->
+      <!-- Bookings by status (donut) -->
       <v-col cols="12" md="5">
         <v-card rounded="xl" class="pa-5 h-100">
-          <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">رزروها بر اساس وضعیت</div>
+          <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">Bookings by Status</div>
           <div class="d-flex justify-center mb-4">
             <div style="position:relative;width:200px;height:200px">
               <svg viewBox="0 0 200 200" width="200" height="200">
@@ -69,7 +69,7 @@
               </svg>
               <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)" class="text-center">
                 <div class="text-h5 font-weight-bold text-secondary">{{ stats?.total ?? 0 }}</div>
-                <div class="text-caption text-grey">کل</div>
+                <div class="text-caption text-grey">Total</div>
               </div>
             </div>
           </div>
@@ -90,12 +90,12 @@
         </v-card>
       </v-col>
 
-      <!-- نمودار ستونی روزانه -->
+      <!-- Daily bookings bar chart -->
       <v-col cols="12" md="7">
         <v-card rounded="xl" class="pa-5 h-100">
           <div class="d-flex align-center justify-space-between mb-4">
-            <div class="text-subtitle-1 font-weight-bold text-secondary">رزروهای روزانه</div>
-            <v-chip size="small" color="primary" variant="tonal">{{ period }} روز اخیر</v-chip>
+            <div class="text-subtitle-1 font-weight-bold text-secondary">Daily Bookings</div>
+            <v-chip size="small" color="primary" variant="tonal">Last {{ period }} days</v-chip>
           </div>
 
           <div v-if="dailyData.length === 0" class="d-flex align-center justify-center" style="height:200px">
@@ -131,11 +131,12 @@
       </v-col>
     </v-row>
 
-    <!-- درآمد + رانندگان برتر -->
+    <!-- Revenue + Top drivers -->
     <v-row class="mt-4">
+      <!-- Revenue summary -->
       <v-col cols="12" md="4">
         <v-card rounded="xl" class="pa-5 h-100">
-          <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">خلاصه درآمد</div>
+          <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">Revenue Summary</div>
           <v-list density="compact">
             <v-list-item v-for="rev in revenueSummary" :key="rev.label" class="px-0">
               <template #prepend>
@@ -154,12 +155,12 @@
         </v-card>
       </v-col>
 
-      <!-- جدول رزروهای اخیر -->
+      <!-- Recent bookings table -->
       <v-col cols="12" md="8">
         <v-card rounded="xl" class="pa-0">
           <div class="pa-5 d-flex align-center justify-space-between">
-            <div class="text-subtitle-1 font-weight-bold text-secondary">رزروهای اخیر</div>
-            <v-btn variant="text" color="primary" to="/admin/bookings" size="small">مشاهده همه</v-btn>
+            <div class="text-subtitle-1 font-weight-bold text-secondary">Recent Bookings</div>
+            <v-btn variant="text" color="primary" to="/admin/bookings" size="small">View All</v-btn>
           </div>
           <v-divider />
           <v-data-table
@@ -173,13 +174,13 @@
               <span class="text-body-2">{{ item.user?.fullName }}</span>
             </template>
             <template #item.status="{ item }">
-              <v-chip :color="statusColor(item.status)" size="x-small" label>{{ getStatusText(item.status) }}</v-chip>
+              <v-chip :color="statusColor(item.status)" size="x-small" label>{{ item.status }}</v-chip>
             </template>
             <template #item.estimatedFare="{ item }">
-              <span class="font-weight-bold text-primary">تومان{{ (item.finalFare || item.estimatedFare)?.toFixed(2) }}</span>
+              <span class="font-weight-bold text-primary">{{ formatToman(item.finalFare || item.estimatedFare) }}</span>
             </template>
             <template #item.createdAt="{ item }">
-              <span class="text-caption text-grey">{{ new Date(item.createdAt).toLocaleDateString('fa-IR') }}</span>
+              <span class="text-caption text-grey">{{ new Date(item.createdAt).toLocaleDateString() }}</span>
             </template>
           </v-data-table>
         </v-card>
@@ -189,6 +190,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatToman, formatTomanCompact } from '~/utils/currency'
 definePageMeta({ layout: 'admin' })
 
 const { $api } = useNuxtApp()
@@ -213,33 +215,27 @@ async function loadData() {
   } finally { loading.value = false }
 }
 
-const getStatusText = (status: string) => ({
-  pending: 'در انتظار',
-  confirmed: 'تأیید شده',
-  in_progress: 'در حال انجام',
-  completed: 'تکمیل شده',
-  cancelled: 'لغو شده',
-}[status] || status)
-
+// ── KPI Cards ──────────────────────────────────────────────────────────────────
 const kpiCards = computed(() => [
-  { label: 'کل رزروها', value: stats.value?.total ?? 0, icon: 'mdi-calendar-check', color: 'primary', trend: 12 },
-  { label: 'سفرهای تکمیل شده', value: stats.value?.completed ?? 0, icon: 'mdi-flag-checkered', color: 'success', trend: 8 },
-  { label: 'درآمد کل', value: `${(stats.value?.totalRevenue ?? 0).toLocaleString()} تومان`, icon: 'mdi-currency-usd', color: 'info', trend: 15 },
-  { label: 'نرخ لغو', value: stats.value?.total ? `${Math.round((stats.value.cancelled / stats.value.total) * 100)}%` : '۰%', icon: 'mdi-close-circle', color: 'error', trend: -3 },
+  { label: 'Total Bookings', value: stats.value?.total ?? 0, icon: 'mdi-calendar-check', color: 'primary', trend: 12 },
+  { label: 'Completed Rides', value: stats.value?.completed ?? 0, icon: 'mdi-flag-checkered', color: 'success', trend: 8 },
+  { label: 'درآمد کل', value: stats.value ? formatTomanCompact(stats.value.totalRevenue ?? 0) : '—', icon: 'mdi-cash', color: 'info', trend: 15 },
+  { label: 'Cancellation Rate', value: stats.value?.total ? `${Math.round((stats.value.cancelled / stats.value.total) * 100)}%` : '0%', icon: 'mdi-close-circle', color: 'error', trend: -3 },
 ])
 
+// ── Status Breakdown (donut) ───────────────────────────────────────────────────
 const statusBreakdown = computed(() => [
-  { label: 'در انتظار', count: stats.value?.pending ?? 0, color: '#FF9800', chipColor: 'warning' },
-  { label: 'تأیید شده', count: stats.value?.confirmed ?? 0, color: '#2196F3', chipColor: 'info' },
-  { label: 'تکمیل شده', count: stats.value?.completed ?? 0, color: '#4CAF50', chipColor: 'success' },
-  { label: 'لغو شده', count: stats.value?.cancelled ?? 0, color: '#F44336', chipColor: 'error' },
+  { label: 'Pending', count: stats.value?.pending ?? 0, color: '#FF9800', chipColor: 'warning' },
+  { label: 'Confirmed', count: stats.value?.confirmed ?? 0, color: '#2196F3', chipColor: 'info' },
+  { label: 'Completed', count: stats.value?.completed ?? 0, color: '#4CAF50', chipColor: 'success' },
+  { label: 'Cancelled', count: stats.value?.cancelled ?? 0, color: '#F44336', chipColor: 'error' },
 ])
 
-const circumference = 2 * Math.PI * 80
+const circumference = 2 * Math.PI * 80 // ≈ 502
 
 const donutSegments = computed(() => {
   const total = stats.value?.total || 1
-  let offset = circumference * 0.25
+  let offset = circumference * 0.25 // start at top
   return statusBreakdown.value.map((item) => {
     const dash = (item.count / total) * circumference
     const seg = { color: item.color, dash, offset: -offset + circumference }
@@ -248,6 +244,7 @@ const donutSegments = computed(() => {
   })
 })
 
+// ── Daily chart ────────────────────────────────────────────────────────────────
 const dailyData = computed(() => {
   const days = parseInt(period.value)
   const result = []
@@ -259,7 +256,7 @@ const dailyData = computed(() => {
       new Date(b.createdAt).toISOString().slice(0, 10) === dateStr,
     ).length
     result.push({
-      label: d.toLocaleDateString('fa-IR', { month: 'numeric', day: 'numeric' }),
+      label: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
       count,
     })
   }
@@ -268,6 +265,7 @@ const dailyData = computed(() => {
 
 const maxDaily = computed(() => Math.max(...dailyData.value.map((d) => d.count), 1))
 
+// ── Revenue summary ────────────────────────────────────────────────────────────
 const revenueSummary = computed(() => {
   const completed = allBookings.value.filter((b) => b.status === 'completed')
   const totalRev = completed.reduce((sum, b) => sum + parseFloat(b.finalFare || b.estimatedFare || 0), 0)
@@ -276,22 +274,23 @@ const revenueSummary = computed(() => {
     ? completed.reduce((sum, b) => sum + parseFloat(b.distanceKm || 0), 0) / completed.length
     : 0
   return [
-    { label: 'درآمد کل', value: `${totalRev.toLocaleString()} تومان`, icon: 'mdi-cash-multiple', color: 'success' },
-    { label: 'میانگین کرایه', value: `${avgFare.toLocaleString()} تومان`, icon: 'mdi-cash', color: 'primary' },
-    { label: 'میانگین مسافت', value: `${avgDist.toFixed(1)} کیلومتر`, icon: 'mdi-map-marker-distance', color: 'info' },
-    { label: 'سفرهای تکمیل شده', value: completed.length, icon: 'mdi-check-circle', color: 'secondary' },
+    { label: 'درآمد کل', value: formatToman(totalRev), icon: 'mdi-cash-multiple', color: 'success' },
+    { label: 'میانگین کرایه', value: formatToman(avgFare), icon: 'mdi-cash', color: 'primary' },
+    { label: 'Avg. Distance', value: `${avgDist} km`, icon: 'mdi-map-marker-distance', color: 'info' },
+    { label: 'Completed Trips', value: completed.length, icon: 'mdi-check-circle', color: 'secondary' },
   ]
 })
 
+// ── Recent bookings ────────────────────────────────────────────────────────────
 const recentBookings = computed(() =>
   [...allBookings.value].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 8),
 )
 
 const recentHeaders = [
-  { title: 'مشتری', key: 'user', sortable: false },
-  { title: 'تاریخ', key: 'createdAt', sortable: true },
-  { title: 'کرایه', key: 'estimatedFare', sortable: true },
-  { title: 'وضعیت', key: 'status', sortable: true },
+  { title: 'Customer', key: 'user', sortable: false },
+  { title: 'Date', key: 'createdAt', sortable: true },
+  { title: 'Fare', key: 'estimatedFare', sortable: true },
+  { title: 'Status', key: 'status', sortable: true },
 ]
 
 const statusColor = (s: string) =>

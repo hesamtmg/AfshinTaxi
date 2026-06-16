@@ -50,7 +50,7 @@
                 </div>
                 <div class="text-right">
                   <div class="text-h6 font-weight-bold text-primary">
-                    ${{ (booking.finalFare || booking.estimatedFare) }}
+                    {{ formatToman(booking.finalFare || booking.estimatedFare) }}
                   </div>
                   <div class="text-caption text-grey">{{ booking.distanceKm }} km</div>
                 </div>
@@ -200,7 +200,7 @@
           <v-list-item prepend-icon="mdi-currency-usd" density="compact">
             <template #title><span class="text-caption text-grey">Fare</span></template>
             <template #subtitle>
-              <span class="text-primary font-weight-bold">${{ (selectedBooking.finalFare || selectedBooking.estimatedFare) }}</span>
+              <span class="text-primary font-weight-bold">{{ formatToman(selectedBooking.finalFare || selectedBooking.estimatedFare) }}</span>
               <span v-if="!selectedBooking.finalFare" class="text-grey text-caption"> (estimated)</span>
             </template>
           </v-list-item>
@@ -271,6 +271,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatToman } from '~/utils/currency'
 definePageMeta({ layout: 'client' })
 
 const bookingsStore = useBookingsStore()

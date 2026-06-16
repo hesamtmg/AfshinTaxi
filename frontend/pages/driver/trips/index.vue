@@ -2,14 +2,14 @@
   <div>
     <div class="driver-hero pa-8 mb-6">
       <v-container>
-        <div class="text-overline text-primary font-weight-bold mb-1">پنل راننده</div>
-        <h1 class="text-h4 font-weight-bold text-secondary">سفرهای من</h1>
-        <p class="text-body-2 text-grey mt-1">همه سفرهای تعیین شده و جزئیات آنها</p>
+        <div class="text-overline text-primary font-weight-bold mb-1">Driver Portal</div>
+        <h1 class="text-h4 font-weight-bold text-secondary">My Trips</h1>
+        <p class="text-body-2 text-grey mt-1">All assigned trips and their details</p>
       </v-container>
     </div>
 
     <v-container>
-      <!-- تب‌های فیلتر -->
+      <!-- Filter tabs -->
       <v-tabs v-model="activeTab" color="primary" class="mb-6">
         <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
           {{ tab.label }}
@@ -17,28 +17,28 @@
             v-if="tabCount(tab.value) > 0"
             size="x-small"
             :color="tab.color"
-            class="mr-2"
+            class="ml-2"
           >
             {{ tabCount(tab.value) }}
           </v-chip>
         </v-tab>
       </v-tabs>
 
-      <!-- در حال بارگذاری -->
+      <!-- Loading -->
       <div v-if="driverStore.loading" class="d-flex justify-center pa-16">
         <v-progress-circular indeterminate color="primary" size="48" />
       </div>
 
-      <!-- خالی -->
+      <!-- Empty -->
       <div v-else-if="filteredTrips.length === 0" class="text-center pa-16">
         <v-icon size="72" color="grey-lighten-2" class="mb-4">mdi-car-off</v-icon>
-        <div class="text-h6 text-grey mb-2">هیچ سفری یافت نشد</div>
+        <div class="text-h6 text-grey mb-2">No trips found</div>
         <div class="text-body-2 text-grey">
-          {{ activeTab === 'all' ? 'هنوز سفری به شما اختصاص داده نشده است.' : `هیچ سفری با وضعیت ${getTabName(activeTab)} وجود ندارد.` }}
+          {{ activeTab === 'all' ? 'No trips assigned to you yet.' : `No ${activeTab} trips.` }}
         </div>
       </div>
 
-      <!-- شبکه سفرها -->
+      <!-- Trips grid -->
       <v-row v-else>
         <v-col
           v-for="trip in filteredTrips"
@@ -51,30 +51,30 @@
             class="trip-card"
             @click="navigateTo(`/driver/trips/${trip.id}`)"
           >
-            <!-- نوار وضعیت -->
+            <!-- Status bar -->
             <div class="status-bar" :style="{ background: statusGradient(trip.status) }" />
 
             <div class="pa-5">
-              <!-- هدر -->
+              <!-- Header -->
               <div class="d-flex align-start justify-space-between mb-4">
                 <div>
                   <v-chip :color="statusColor(trip.status)" size="small" label class="mb-2">
                     <v-icon start size="12">{{ statusIcon(trip.status) }}</v-icon>
-                    {{ getStatusText(trip.status).toUpperCase() }}
+                    {{ trip.status.replace('_', ' ').toUpperCase() }}
                   </v-chip>
                   <div class="text-caption text-grey">
                     #{{ trip.id.slice(0, 8).toUpperCase() }}
                   </div>
                 </div>
-                <div class="text-left">
+                <div class="text-right">
                   <div class="text-h6 font-weight-bold text-primary">
-                    {{ (trip.finalFare || trip.estimatedFare)?.toLocaleString() }} تومان
+                    {{ formatToman(trip.finalFare || trip.estimatedFare) }}
                   </div>
-                  <div class="text-caption text-grey">{{ trip.distanceKm }} کیلومتر</div>
+                  <div class="text-caption text-grey">{{ trip.distanceKm }} km</div>
                 </div>
               </div>
 
-              <!-- مسیر -->
+              <!-- Route -->
               <div class="d-flex align-start gap-3 mb-4">
                 <div class="d-flex flex-column align-center mt-1 flex-shrink-0">
                   <v-icon color="success" size="12">mdi-circle</v-icon>
@@ -93,13 +93,13 @@
 
               <v-divider class="mb-3" />
 
-              <!-- فوتر -->
+              <!-- Footer -->
               <div class="d-flex align-center justify-space-between">
                 <div class="d-flex align-center gap-1">
                   <v-icon size="14" color="grey">mdi-calendar-clock</v-icon>
                   <span class="text-caption text-grey">
-                    {{ new Date(trip.scheduledAt).toLocaleDateString('fa-IR') }}
-                    {{ new Date(trip.scheduledAt).toLocaleTimeString('fa-IR') }}
+                    {{ new Date(trip.scheduledAt).toLocaleDateString() }}
+                    {{ new Date(trip.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
                   </span>
                 </div>
                 <div class="d-flex align-center gap-1">
@@ -116,22 +116,10 @@
 </template>
 
 <script setup lang="ts">
+import { formatToman } from '~/utils/currency'
 definePageMeta({ layout: 'driver' })
 
 const driverStore = useDriverStore()
-
-const getStatusText = (status: string) => ({
-  pending: 'در انتظار',
-  confirmed: 'تأیید شده',
-  in_progress: 'در حال انجام',
-  completed: 'تکمیل شده',
-  cancelled: 'لغو شده',
-}[status] || status)
-
-const getTabName = (value: string) => {
-  const tab = tabs.find(t => t.value === value)
-  return tab?.label || ''
-}
 
 onMounted(async () => {
   driverStore.hydrate()
@@ -142,11 +130,11 @@ onMounted(async () => {
 const activeTab = ref('all')
 
 const tabs = [
-  { label: 'همه',         value: 'all',         color: 'secondary' },
-  { label: 'پیش رو',    value: 'confirmed',    color: 'info' },
-  { label: 'در حال انجام', value: 'in_progress',  color: 'primary' },
-  { label: 'تکمیل شده',   value: 'completed',    color: 'success' },
-  { label: 'لغو شده',   value: 'cancelled',    color: 'error' },
+  { label: 'All',         value: 'all',         color: 'secondary' },
+  { label: 'Upcoming',    value: 'confirmed',    color: 'info' },
+  { label: 'In Progress', value: 'in_progress',  color: 'primary' },
+  { label: 'Completed',   value: 'completed',    color: 'success' },
+  { label: 'Cancelled',   value: 'cancelled',    color: 'error' },
 ]
 
 const filteredTrips = computed(() => {

@@ -81,7 +81,7 @@
         </template>
 
         <template #item.estimatedFare="{ item }">
-          <span class="font-weight-bold text-primary">${{ (item.finalFare || item.estimatedFare) }}</span>
+          <span class="font-weight-bold text-primary">{{ formatToman(item.finalFare || item.estimatedFare) }}</span>
         </template>
 
         <template #item.status="{ item }">
@@ -191,7 +191,7 @@
           <v-list-item prepend-icon="mdi-currency-usd">
             <template #title><span class="text-caption text-grey">Fare</span></template>
             <template #subtitle>
-              <span class="text-primary font-weight-bold">${{ (selectedBooking.finalFare || selectedBooking.estimatedFare) }}</span>
+              <span class="text-primary font-weight-bold">{{ formatToman(selectedBooking.finalFare || selectedBooking.estimatedFare) }}</span>
               <span v-if="!selectedBooking.finalFare" class="text-caption text-grey ml-1">(est.)</span>
             </template>
           </v-list-item>
@@ -311,8 +311,8 @@
 
           <v-text-field
             v-model="finalFareInput"
-            label="Final fare override (optional)"
-            prepend-inner-icon="mdi-currency-usd"
+            label="کرایه نهایی (تومان، اختیاری)"
+            prepend-inner-icon="mdi-cash"
             type="number"
             variant="outlined"
             rounded="lg"
@@ -340,6 +340,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatToman } from '~/utils/currency'
 definePageMeta({ layout: 'admin' })
 
 const bookingsStore = useBookingsStore()

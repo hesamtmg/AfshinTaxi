@@ -224,7 +224,7 @@ export class BookingsService {
     if (busyDriverIds.length > 0) {
       qb.andWhere('driver.id NOT IN (:...busyDriverIds)', { busyDriverIds });
     }
-
+    console.log('driverRepo',qb)
     return qb.orderBy('driver.fullName', 'ASC').getMany();
   }
 

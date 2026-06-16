@@ -7,28 +7,16 @@ export class SmsService {
   constructor(private readonly config: ConfigService) {}
 
   async sendOtp(phone: string, otp: string): Promise<void> {
-    const message = `کد تایید آفشین‌تاکسی: ${otp}\nاین کد ۵ دقیقه معتبر است.`;
+    const message = `Your AfshinTaxi verification code is: ${otp}. Valid for 5 minutes.`;
     await this.send(phone, message);
   }
 
   async sendBookingConfirmation(
-    phone: string,
-    driverName: string,
-    carModel: string,
-    carPlate: string,
-    scheduledAt: Date,
-    fare?: number,
+    phone: string, driverName: string,
+    carModel: string, carPlate: string, scheduledAt: Date,
   ): Promise<void> {
-    const time = new Date(scheduledAt).toLocaleString('fa-IR');
-    const fareText = fare
-      ? `\nکرایه: ${fare.toLocaleString('en-US')} تومان`
-      : '';
-    const message =
-      `آفشین‌تاکسی: سفر شما تایید شد 🚖\n` +
-      `راننده: ${driverName}\n` +
-      `خودرو: ${carModel} (${carPlate})\n` +
-      `زمان: ${time}` +
-      fareText;
+    const time = new Date(scheduledAt).toLocaleString();
+    const message = `AfshinTaxi: Ride confirmed!\nDriver: ${driverName}\nCar: ${carModel} (${carPlate})\nTime: ${time}`;
     await this.send(phone, message);
   }
 

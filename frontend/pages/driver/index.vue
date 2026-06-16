@@ -1,15 +1,15 @@
 <template>
   <div>
-    <!-- هدر -->
+    <!-- Header -->
     <div class="driver-hero pa-8 mb-6">
       <v-container>
         <div class="d-flex align-center justify-space-between flex-wrap gap-4">
           <div>
-            <div class="text-overline text-primary font-weight-bold mb-1">پنل راننده</div>
+            <div class="text-overline text-primary font-weight-bold mb-1">Driver Portal</div>
             <h1 class="text-h4 font-weight-bold text-secondary">
-              خوش آمدی، {{ driverStore.driver?.fullName?.split(' ')[0] }} 👋
+              Welcome, {{ driverStore.driver?.fullName?.split(' ')[0] }} 👋
             </h1>
-            <p class="text-body-2 text-grey mt-1">خلاصه فعالیت شما</p>
+            <p class="text-body-2 text-grey mt-1">Here's your activity overview</p>
           </div>
           <v-card color="secondary" rounded="xl" class="pa-4" flat>
             <div class="d-flex align-center gap-3">
@@ -32,7 +32,7 @@
     </div>
 
     <v-container>
-      <!-- آمار -->
+      <!-- Stats -->
       <v-row class="mb-6">
         <v-col v-for="stat in statCards" :key="stat.label" cols="6" md="3">
           <v-card rounded="xl" class="pa-5">
@@ -48,12 +48,12 @@
       </v-row>
 
       <v-row>
-        <!-- سفرهای آینده -->
+        <!-- Upcoming trips -->
         <v-col cols="12" md="7">
           <v-card rounded="xl" class="pa-0">
             <div class="pa-5 d-flex align-center justify-space-between">
-              <div class="text-subtitle-1 font-weight-bold text-secondary">سفرهای پیش رو</div>
-              <v-btn variant="text" color="primary" size="small" to="/driver/trips">مشاهده همه</v-btn>
+              <div class="text-subtitle-1 font-weight-bold text-secondary">Upcoming Trips</div>
+              <v-btn variant="text" color="primary" size="small" to="/driver/trips">View All</v-btn>
             </div>
             <v-divider />
 
@@ -63,7 +63,7 @@
 
             <div v-else-if="upcomingTrips.length === 0" class="text-center pa-10">
               <v-icon size="56" color="grey-lighten-2" class="mb-3">mdi-calendar-blank</v-icon>
-              <div class="text-body-2 text-grey">هیچ سفری در پیش رو ندارید</div>
+              <div class="text-body-2 text-grey">No upcoming trips</div>
             </div>
 
             <div v-else>
@@ -75,7 +75,7 @@
               >
                 <div class="d-flex align-start justify-space-between gap-3">
                   <div class="d-flex align-start gap-3 flex-1 min-w-0">
-                    <!-- نشانگر مسیر -->
+                    <!-- Route indicator -->
                     <div class="d-flex flex-column align-center mt-1 flex-shrink-0">
                       <v-icon color="success" size="12">mdi-circle</v-icon>
                       <div style="width:1px;height:20px;background:#e0e0e0;margin:2px 0" />
@@ -90,15 +90,15 @@
                       </div>
                     </div>
                   </div>
-                  <div class="text-left flex-shrink-0">
+                  <div class="text-right flex-shrink-0">
                     <v-chip :color="statusColor(trip.status)" size="x-small" label class="mb-1">
-                      {{ getStatusText(trip.status) }}
+                      {{ trip.status.replace('_', ' ') }}
                     </v-chip>
                     <div class="text-caption text-grey">
-                      {{ new Date(trip.scheduledAt).toLocaleDateString('fa-IR') }}
+                      {{ new Date(trip.scheduledAt).toLocaleDateString() }}
                     </div>
                     <div class="text-caption font-weight-bold text-primary">
-                      {{ (trip.finalFare || trip.estimatedFare)?.toLocaleString() }} تومان
+                      {{ formatToman(trip.finalFare || trip.estimatedFare) }}
                     </div>
                   </div>
                 </div>
@@ -108,11 +108,11 @@
           </v-card>
         </v-col>
 
-        <!-- ستون راست -->
+        <!-- Right column -->
         <v-col cols="12" md="5">
-          <!-- کارت پروفایل راننده -->
+          <!-- Driver profile card -->
           <v-card rounded="xl" class="pa-5 mb-4">
-            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">پروفایل من</div>
+            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">My Profile</div>
             <div class="d-flex align-center gap-3 mb-4">
               <v-avatar color="primary" size="56">
                 <span class="text-h5 font-weight-bold text-white">
@@ -129,18 +129,18 @@
                   color="success"
                   class="mt-1"
                 >
-                  {{ getDriverStatusText(driverStore.driver?.status) }}
+                  {{ driverStore.driver?.status }}
                 </v-chip>
               </div>
             </div>
             <v-divider class="mb-3" />
             <v-list density="compact" class="pa-0">
               <v-list-item prepend-icon="mdi-car" density="compact" class="px-0">
-                <template #title><span class="text-caption text-grey">خودرو</span></template>
+                <template #title><span class="text-caption text-grey">Vehicle</span></template>
                 <template #subtitle>{{ driverStore.driver?.carModel }}</template>
               </v-list-item>
               <v-list-item prepend-icon="mdi-card-text" density="compact" class="px-0">
-                <template #title><span class="text-caption text-grey">پلاک</span></template>
+                <template #title><span class="text-caption text-grey">Plate</span></template>
                 <template #subtitle>
                   <v-chip size="x-small" color="primary" variant="tonal">
                     {{ driverStore.driver?.carPlate }}
@@ -153,31 +153,31 @@
                 density="compact"
                 class="px-0"
               >
-                <template #title><span class="text-caption text-grey">گواهینامه</span></template>
+                <template #title><span class="text-caption text-grey">License</span></template>
                 <template #subtitle>{{ driverStore.driver?.licenseNumber }}</template>
               </v-list-item>
             </v-list>
             <v-btn variant="tonal" color="primary" block class="mt-4" to="/driver/profile" prepend-icon="mdi-pencil">
-              ویرایش پروفایل
+              Edit Profile
             </v-btn>
           </v-card>
 
-          <!-- خلاصه درآمد -->
+          <!-- Earnings summary -->
           <v-card color="secondary" rounded="xl" class="pa-5">
-            <div class="text-subtitle-1 font-weight-bold text-white mb-4">درآمد</div>
+            <div class="text-subtitle-1 font-weight-bold text-white mb-4">Earnings</div>
             <div class="text-h3 font-weight-bold text-primary mb-1">
-              {{ driverStore.stats?.totalEarnings?.toLocaleString() ?? '۰' }} تومان
+              {{ formatToman(driverStore.stats?.totalEarnings ?? 0) }}
             </div>
-            <div class="text-caption text-grey mb-4">مجموع سفرهای تکمیل شده</div>
+            <div class="text-caption text-grey mb-4">Total from completed trips</div>
             <v-divider color="white" opacity="0.1" class="mb-4" />
             <v-row dense>
               <v-col cols="6" class="text-center">
-                <div class="text-h5 font-weight-bold text-white">{{ driverStore.stats?.completed ?? '۰' }}</div>
-                <div class="text-caption text-grey">تکمیل شده</div>
+                <div class="text-h5 font-weight-bold text-white">{{ driverStore.stats?.completed ?? 0 }}</div>
+                <div class="text-caption text-grey">Completed</div>
               </v-col>
               <v-col cols="6" class="text-center">
-                <div class="text-h5 font-weight-bold text-primary">{{ driverStore.stats?.upcoming ?? '۰' }}</div>
-                <div class="text-caption text-grey">پیش رو</div>
+                <div class="text-h5 font-weight-bold text-primary">{{ driverStore.stats?.upcoming ?? 0 }}</div>
+                <div class="text-caption text-grey">Upcoming</div>
               </v-col>
             </v-row>
           </v-card>
@@ -188,23 +188,10 @@
 </template>
 
 <script setup lang="ts">
+import { formatToman } from '~/utils/currency'
 definePageMeta({ layout: 'driver' })
 
 const driverStore = useDriverStore()
-
-const getStatusText = (status: string) => ({
-  pending: 'در انتظار',
-  confirmed: 'تأیید شده',
-  in_progress: 'در حال انجام',
-  completed: 'تکمیل شده',
-  cancelled: 'لغو شده',
-}[status] || status)
-
-const getDriverStatusText = (status: string) => ({
-  active: 'فعال',
-  inactive: 'غیرفعال',
-  suspended: 'معلق',
-}[status] || status)
 
 onMounted(async () => {
   driverStore.hydrate()
@@ -213,10 +200,10 @@ onMounted(async () => {
 })
 
 const statCards = computed(() => [
-  { label: 'کل سفرها',    value: driverStore.stats?.total      ?? '۰', icon: 'mdi-car-multiple',    color: 'primary' },
-  { label: 'پیش رو',       value: driverStore.stats?.upcoming    ?? '۰', icon: 'mdi-clock-outline',   color: 'warning' },
-  { label: 'در حال انجام',    value: driverStore.stats?.inProgress  ?? '۰', icon: 'mdi-car',             color: 'info' },
-  { label: 'تکمیل شده',      value: driverStore.stats?.completed   ?? '۰', icon: 'mdi-flag-checkered',  color: 'success' },
+  { label: 'Total Trips',    value: driverStore.stats?.total      ?? 0, icon: 'mdi-car-multiple',    color: 'primary' },
+  { label: 'Upcoming',       value: driverStore.stats?.upcoming    ?? 0, icon: 'mdi-clock-outline',   color: 'warning' },
+  { label: 'In Progress',    value: driverStore.stats?.inProgress  ?? 0, icon: 'mdi-car',             color: 'info' },
+  { label: 'Completed',      value: driverStore.stats?.completed   ?? 0, icon: 'mdi-flag-checkered',  color: 'success' },
 ])
 
 const upcomingTrips = computed(() =>
