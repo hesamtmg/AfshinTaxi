@@ -15,7 +15,6 @@ export interface Booking {
   scheduledAt: string
   passengerCount?: number
   notes?: string
-  cancellationReason?: string
   driver?: {
     fullName: string
     phone: string
@@ -24,23 +23,16 @@ export interface Booking {
     carColor?: string
     avatarUrl?: string
   }
-  user?: {
-    id: string
-    fullName: string
-    phone: string
-    email?: string
-  }
   createdAt: string
-  updatedAt: string
 }
 
 export const useBookingsStore = defineStore('bookings', {
   state: () => ({
-    myBookings:   [] as Booking[],
-    allBookings:  [] as Booking[],
+    myBookings: [] as Booking[],
+    allBookings: [] as Booking[],
     currentBooking: null as Booking | null,
     loading: false,
-    stats:   null as any,
+    stats: null as any,
   }),
 
   actions: {
@@ -50,7 +42,9 @@ export const useBookingsStore = defineStore('bookings', {
       try {
         const { data } = await $api.get('/bookings/my')
         this.myBookings = data
-      } finally { this.loading = false }
+      } finally {
+        this.loading = false
+      }
     },
 
     async fetchAllBookings(status?: string) {
@@ -60,7 +54,9 @@ export const useBookingsStore = defineStore('bookings', {
         const params = status ? { status } : {}
         const { data } = await $api.get('/bookings', { params })
         this.allBookings = data
-      } finally { this.loading = false }
+      } finally {
+        this.loading = false
+      }
     },
 
     async fetchStats() {
@@ -78,13 +74,15 @@ export const useBookingsStore = defineStore('bookings', {
 
     async assignDriver(bookingId: string, driverId: string, finalFare?: number) {
       const { $api } = useNuxtApp()
-      const { data } = await $api.patch(`/bookings/${bookingId}/assign-driver`, { driverId, finalFare })
+      const { data } = await $api.patch(`/bookings/${bookingId}/assign-driver`, {
+        driverId,
+        finalFare,
+      })
       const idx = this.allBookings.findIndex((b) => b.id === bookingId)
       if (idx !== -1) this.allBookings[idx] = data
       return data
     },
 
-    // Re-throws so the UI can catch and display the server error message
     async cancelBooking(bookingId: string, reason?: string) {
       const { $api } = useNuxtApp()
       const { data } = await $api.patch(`/bookings/my/${bookingId}/cancel`, { reason })

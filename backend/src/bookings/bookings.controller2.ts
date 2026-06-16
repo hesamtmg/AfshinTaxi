@@ -59,13 +59,6 @@ export class BookingsController {
     return this.bookingsService.getStats();
   }
 
-  // ── New: get available drivers for a time slot ────────────────────────────
-  @Get('available-drivers')
-  @Roles(UserRole.ADMIN)
-  getAvailableDrivers(@Query('scheduledAt') scheduledAt: string) {
-    return this.bookingsService.getAvailableDrivers(scheduledAt);
-  }
-
   @Get(':id')
   @Roles(UserRole.ADMIN)
   findOne(@Param('id') id: string) {

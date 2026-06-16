@@ -32,16 +32,4 @@ export class SettingsService {
     const val = await this.get('fare_per_km');
     return parseFloat(val || '1.5');
   }
-
-  // How many minutes before scheduled time cancellation is no longer allowed
-  async getCancellationDeadlineMinutes(): Promise<number> {
-    const val = await this.get('cancellation_deadline_minutes');
-    return parseInt(val || '60');
-  }
-
-  // Buffer window in minutes to check driver availability around a trip
-  async getDriverBufferMinutes(): Promise<number> {
-    const val = await this.get('driver_buffer_minutes');
-    return parseInt(val || '60');
-  }
 }
