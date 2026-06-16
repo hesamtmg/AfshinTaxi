@@ -5,11 +5,11 @@
       <v-container>
         <div class="d-flex align-center justify-space-between flex-wrap gap-4">
           <div>
-            <div class="text-overline text-primary font-weight-bold mb-1">Driver Portal</div>
+            <div class="text-overline text-primary font-weight-bold mb-1">پنل راننده</div>
             <h1 class="text-h4 font-weight-bold text-secondary">
-              Welcome, {{ driverStore.driver?.fullName?.split(' ')[0] }} 👋
+              خوش آمدید، {{ driverStore.driver?.fullName?.split(' ')[0] }} 👋
             </h1>
-            <p class="text-body-2 text-grey mt-1">Here's your activity overview</p>
+            <p class="text-body-2 text-grey mt-1">خلاصه فعالیت شما</p>
           </div>
           <v-card color="secondary" rounded="xl" class="pa-4" flat>
             <div class="d-flex align-center gap-3">
@@ -32,7 +32,7 @@
     </div>
 
     <v-container>
-      <!-- Stats -->
+      <!-- آمار -->
       <v-row class="mb-6">
         <v-col v-for="stat in statCards" :key="stat.label" cols="6" md="3">
           <v-card rounded="xl" class="pa-5">
@@ -48,12 +48,12 @@
       </v-row>
 
       <v-row>
-        <!-- Upcoming trips -->
+        <!-- سفرهای پیش‌رو -->
         <v-col cols="12" md="7">
           <v-card rounded="xl" class="pa-0">
             <div class="pa-5 d-flex align-center justify-space-between">
-              <div class="text-subtitle-1 font-weight-bold text-secondary">Upcoming Trips</div>
-              <v-btn variant="text" color="primary" size="small" to="/driver/trips">View All</v-btn>
+              <div class="text-subtitle-1 font-weight-bold text-secondary">سفرهای پیش‌رو</div>
+              <v-btn variant="text" color="primary" size="small" to="/driver/trips">مشاهده همه</v-btn>
             </div>
             <v-divider />
 
@@ -63,7 +63,7 @@
 
             <div v-else-if="upcomingTrips.length === 0" class="text-center pa-10">
               <v-icon size="56" color="grey-lighten-2" class="mb-3">mdi-calendar-blank</v-icon>
-              <div class="text-body-2 text-grey">No upcoming trips</div>
+              <div class="text-body-2 text-grey">هیچ سفر پیش‌رویی وجود ندارد</div>
             </div>
 
             <div v-else>
@@ -75,7 +75,7 @@
               >
                 <div class="d-flex align-start justify-space-between gap-3">
                   <div class="d-flex align-start gap-3 flex-1 min-w-0">
-                    <!-- Route indicator -->
+                    <!-- نشانگر مسیر -->
                     <div class="d-flex flex-column align-center mt-1 flex-shrink-0">
                       <v-icon color="success" size="12">mdi-circle</v-icon>
                       <div style="width:1px;height:20px;background:#e0e0e0;margin:2px 0" />
@@ -108,11 +108,11 @@
           </v-card>
         </v-col>
 
-        <!-- Right column -->
+        <!-- ستون راست -->
         <v-col cols="12" md="5">
-          <!-- Driver profile card -->
+          <!-- کارت پروفایل راننده -->
           <v-card rounded="xl" class="pa-5 mb-4">
-            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">My Profile</div>
+            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">پروفایل من</div>
             <div class="d-flex align-center gap-3 mb-4">
               <v-avatar color="primary" size="56">
                 <span class="text-h5 font-weight-bold text-white">
@@ -136,11 +136,11 @@
             <v-divider class="mb-3" />
             <v-list density="compact" class="pa-0">
               <v-list-item prepend-icon="mdi-car" density="compact" class="px-0">
-                <template #title><span class="text-caption text-grey">Vehicle</span></template>
+                <template #title><span class="text-caption text-grey">خودرو</span></template>
                 <template #subtitle>{{ driverStore.driver?.carModel }}</template>
               </v-list-item>
               <v-list-item prepend-icon="mdi-card-text" density="compact" class="px-0">
-                <template #title><span class="text-caption text-grey">Plate</span></template>
+                <template #title><span class="text-caption text-grey">پلاک</span></template>
                 <template #subtitle>
                   <v-chip size="x-small" color="primary" variant="tonal">
                     {{ driverStore.driver?.carPlate }}
@@ -153,31 +153,31 @@
                 density="compact"
                 class="px-0"
               >
-                <template #title><span class="text-caption text-grey">License</span></template>
+                <template #title><span class="text-caption text-grey">گواهینامه</span></template>
                 <template #subtitle>{{ driverStore.driver?.licenseNumber }}</template>
               </v-list-item>
             </v-list>
             <v-btn variant="tonal" color="primary" block class="mt-4" to="/driver/profile" prepend-icon="mdi-pencil">
-              Edit Profile
+              ویرایش پروفایل
             </v-btn>
           </v-card>
 
-          <!-- Earnings summary -->
+          <!-- خلاصه درآمد -->
           <v-card color="secondary" rounded="xl" class="pa-5">
-            <div class="text-subtitle-1 font-weight-bold text-white mb-4">Earnings</div>
+            <div class="text-subtitle-1 font-weight-bold text-white mb-4">درآمد</div>
             <div class="text-h3 font-weight-bold text-primary mb-1">
               {{ formatToman(driverStore.stats?.totalEarnings ?? 0) }}
             </div>
-            <div class="text-caption text-grey mb-4">Total from completed trips</div>
+            <div class="text-caption text-grey mb-4">مجموع از سفرهای تکمیل شده</div>
             <v-divider color="white" opacity="0.1" class="mb-4" />
             <v-row dense>
               <v-col cols="6" class="text-center">
                 <div class="text-h5 font-weight-bold text-white">{{ driverStore.stats?.completed ?? 0 }}</div>
-                <div class="text-caption text-grey">Completed</div>
+                <div class="text-caption text-grey">تکمیل شده</div>
               </v-col>
               <v-col cols="6" class="text-center">
                 <div class="text-h5 font-weight-bold text-primary">{{ driverStore.stats?.upcoming ?? 0 }}</div>
-                <div class="text-caption text-grey">Upcoming</div>
+                <div class="text-caption text-grey">پیش‌رو</div>
               </v-col>
             </v-row>
           </v-card>
@@ -200,10 +200,10 @@ onMounted(async () => {
 })
 
 const statCards = computed(() => [
-  { label: 'Total Trips',    value: driverStore.stats?.total      ?? 0, icon: 'mdi-car-multiple',    color: 'primary' },
-  { label: 'Upcoming',       value: driverStore.stats?.upcoming    ?? 0, icon: 'mdi-clock-outline',   color: 'warning' },
-  { label: 'In Progress',    value: driverStore.stats?.inProgress  ?? 0, icon: 'mdi-car',             color: 'info' },
-  { label: 'Completed',      value: driverStore.stats?.completed   ?? 0, icon: 'mdi-flag-checkered',  color: 'success' },
+  { label: 'کل سفرها',    value: driverStore.stats?.total      ?? 0, icon: 'mdi-car-multiple',    color: 'primary' },
+  { label: 'پیش‌رو',       value: driverStore.stats?.upcoming    ?? 0, icon: 'mdi-clock-outline',   color: 'warning' },
+  { label: 'در حال انجام',    value: driverStore.stats?.inProgress  ?? 0, icon: 'mdi-car',             color: 'info' },
+  { label: 'تکمیل شده',      value: driverStore.stats?.completed   ?? 0, icon: 'mdi-flag-checkered',  color: 'success' },
 ])
 
 const upcomingTrips = computed(() =>

@@ -4,11 +4,11 @@
       <v-container>
         <div class="d-flex align-center gap-3 mb-2">
           <v-btn icon="mdi-arrow-left" variant="tonal" color="secondary" size="small" @click="$router.back()" />
-          <div class="text-overline text-primary font-weight-bold">Trip Detail</div>
+          <div class="text-overline text-primary font-weight-bold">جزئیات سفر</div>
         </div>
         <div class="d-flex align-center justify-space-between flex-wrap gap-3">
           <div>
-            <h1 class="text-h4 font-weight-bold text-secondary">Trip #{{ trip?.id?.slice(0, 8).toUpperCase() }}</h1>
+            <h1 class="text-h4 font-weight-bold text-secondary">سفر #{{ trip?.id?.slice(0, 8).toUpperCase() }}</h1>
             <p class="text-body-2 text-grey mt-1">{{ trip ? new Date(trip.scheduledAt).toLocaleString() : '' }}</p>
           </div>
           <v-chip v-if="trip" :color="statusColor(trip.status)" size="large" label>
@@ -26,15 +26,15 @@
 
       <div v-else-if="!trip" class="text-center pa-16">
         <v-icon size="72" color="grey-lighten-2" class="mb-4">mdi-car-off</v-icon>
-        <div class="text-h6 text-grey">Trip not found</div>
-        <v-btn class="mt-4" to="/driver/trips" color="primary" variant="tonal">Back to Trips</v-btn>
+        <div class="text-h6 text-grey">سفر یافت نشد</div>
+        <v-btn class="mt-4" to="/driver/trips" color="primary" variant="tonal">بازگشت به سفرها</v-btn>
       </div>
 
       <v-row v-else>
-        <!-- Left: Map + route -->
+        <!-- چپ: نقشه + مسیر -->
         <v-col cols="12" md="7">
 
-          <!-- Neshan Map -->
+          <!-- نقشه نشان -->
           <v-card rounded="xl" class="mb-4" style="overflow:hidden">
             <div id="driver-trip-map" style="width:100%;height:300px" />
             <div class="pa-4 d-flex align-center gap-3 flex-wrap">
@@ -50,13 +50,13 @@
             </div>
           </v-card>
 
-          <!-- Trip info -->
+          <!-- اطلاعات سفر -->
           <v-card rounded="xl" class="pa-6 mb-4">
-            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">Trip Information</div>
+            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">اطلاعات سفر</div>
             <v-row>
               <v-col cols="12" sm="6">
                 <div class="mb-4">
-                  <div class="text-caption text-grey font-weight-bold mb-2">PICKUP</div>
+                  <div class="text-caption text-grey font-weight-bold mb-2">مکان سوار شدن</div>
                   <div class="d-flex align-start gap-2">
                     <v-icon color="success" size="16">mdi-circle</v-icon>
                     <div>
@@ -66,7 +66,7 @@
                   </div>
                 </div>
                 <div>
-                  <div class="text-caption text-grey font-weight-bold mb-2">DROPOFF</div>
+                  <div class="text-caption text-grey font-weight-bold mb-2">مکان پیاده شدن</div>
                   <div class="d-flex align-start gap-2">
                     <v-icon color="error" size="16">mdi-map-marker</v-icon>
                     <div>
@@ -79,19 +79,19 @@
               <v-col cols="12" sm="6">
                 <v-list density="compact" class="pa-0">
                   <v-list-item prepend-icon="mdi-calendar-clock" class="px-0">
-                    <template #title><span class="text-caption text-grey">Scheduled At</span></template>
+                    <template #title><span class="text-caption text-grey">زمان برنامه‌ریزی شده</span></template>
                     <template #subtitle><span class="font-weight-medium">{{ new Date(trip.scheduledAt).toLocaleString() }}</span></template>
                   </v-list-item>
                   <v-list-item prepend-icon="mdi-map-marker-distance" class="px-0">
-                    <template #title><span class="text-caption text-grey">Distance</span></template>
-                    <template #subtitle>{{ trip.distanceKm }} km</template>
+                    <template #title><span class="text-caption text-grey">مسافت</span></template>
+                    <template #subtitle>{{ trip.distanceKm }} کیلومتر</template>
                   </v-list-item>
                   <v-list-item prepend-icon="mdi-account-group" class="px-0">
-                    <template #title><span class="text-caption text-grey">Passengers</span></template>
-                    <template #subtitle>{{ trip.passengerCount || 1 }} passenger(s)</template>
+                    <template #title><span class="text-caption text-grey">مسافران</span></template>
+                    <template #subtitle>{{ trip.passengerCount || 1 }} نفر</template>
                   </v-list-item>
                   <v-list-item v-if="trip.notes" prepend-icon="mdi-note-text" class="px-0">
-                    <template #title><span class="text-caption text-grey">Notes from Customer</span></template>
+                    <template #title><span class="text-caption text-grey">یادداشت مشتری</span></template>
                     <template #subtitle>{{ trip.notes }}</template>
                   </v-list-item>
                 </v-list>
@@ -99,9 +99,9 @@
             </v-row>
           </v-card>
 
-          <!-- Navigation buttons -->
+          <!-- دکمه‌های ناوبری -->
           <v-card rounded="xl" class="pa-5">
-            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">Navigation</div>
+            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">ناوبری</div>
             <div class="d-flex gap-3 flex-wrap">
               <v-btn
                 color="success"
@@ -110,7 +110,7 @@
                 :href="`https://www.google.com/maps/dir/?api=1&origin=${trip.pickupLat},${trip.pickupLng}&destination=${trip.dropoffLat},${trip.dropoffLng}&travelmode=driving`"
                 target="_blank"
               >
-                Google Maps
+                گوگل مپ
               </v-btn>
               <v-btn
                 color="info"
@@ -119,7 +119,7 @@
                 :href="`https://waze.com/ul?ll=${trip.dropoffLat},${trip.dropoffLng}&navigate=yes`"
                 target="_blank"
               >
-                Waze
+                ویز
               </v-btn>
               <v-btn
                 color="primary"
@@ -128,43 +128,43 @@
                 :href="`https://neshan.org/maps/directions/?origin=${trip.pickupLat},${trip.pickupLng}&destination=${trip.dropoffLat},${trip.dropoffLng}`"
                 target="_blank"
               >
-                Neshan
+                نشان
               </v-btn>
             </div>
           </v-card>
         </v-col>
 
-        <!-- Right: Customer + Fare -->
+        <!-- راست: مشتری + کرایه -->
         <v-col cols="12" md="5">
 
-          <!-- Fare -->
+          <!-- کرایه -->
           <v-card color="primary" rounded="xl" class="pa-5 mb-4 text-white">
-            <div class="text-body-2 opacity-80 mb-1">Trip Fare</div>
+            <div class="text-body-2 opacity-80 mb-1">کرایه سفر</div>
             <div class="text-h2 font-weight-bold mb-1">{{ formatToman(trip.finalFare || trip.estimatedFare) }}</div>
             <div class="text-caption opacity-70 mb-4">
-              {{ trip.distanceKm}} km ·
-              {{ trip.finalFare ? 'Final fare set by admin' : 'Estimated fare' }}
+              {{ trip.distanceKm}} کیلومتر ·
+              {{ trip.finalFare ? 'کرایه نهایی تعیین شده توسط ادمین' : 'کرایه تخمینی' }}
             </div>
             <v-divider color="white" opacity="0.2" class="mb-4" />
             <v-row dense>
               <v-col cols="4" class="text-center">
                 <div class="text-h6 font-weight-bold">{{ trip.distanceKm}}</div>
-                <div class="text-caption opacity-70">km</div>
+                <div class="text-caption opacity-70">کیلومتر</div>
               </v-col>
               <v-col cols="4" class="text-center">
                 <div class="text-h6 font-weight-bold">{{ trip.passengerCount || 1 }}</div>
-                <div class="text-caption opacity-70">passengers</div>
+                <div class="text-caption opacity-70">مسافران</div>
               </v-col>
               <v-col cols="4" class="text-center">
-                <div class="text-h6 font-weight-bold">{{ trip.finalFare ? 'Final' : 'Est.' }}</div>
-                <div class="text-caption opacity-70">fare type</div>
+                <div class="text-h6 font-weight-bold">{{ trip.finalFare ? 'نهایی' : 'تخمینی' }}</div>
+                <div class="text-caption opacity-70">نوع کرایه</div>
               </v-col>
             </v-row>
           </v-card>
 
-          <!-- Customer -->
+          <!-- مشتری -->
           <v-card rounded="xl" class="pa-5 mb-4">
-            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">Customer</div>
+            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">مشتری</div>
             <div class="d-flex align-center gap-3 mb-4">
               <v-avatar color="primary" size="52">
                 <span class="text-h6 font-weight-bold text-white">{{ trip.user?.fullName?.charAt(0) }}</span>
@@ -175,14 +175,14 @@
               </div>
             </div>
             <div class="d-flex gap-3">
-              <v-btn color="success" variant="tonal" prepend-icon="mdi-phone" block :href="`tel:${trip.user?.phone}`">Call</v-btn>
-              <v-btn color="info"    variant="tonal" prepend-icon="mdi-message" block :href="`sms:${trip.user?.phone}`">SMS</v-btn>
+              <v-btn color="success" variant="tonal" prepend-icon="mdi-phone" block :href="`tel:${trip.user?.phone}`">تماس</v-btn>
+              <v-btn color="info"    variant="tonal" prepend-icon="mdi-message" block :href="`sms:${trip.user?.phone}`">پیامک</v-btn>
             </div>
           </v-card>
 
-          <!-- Timeline -->
+          <!-- گاهشمار وضعیت -->
           <v-card rounded="xl" class="pa-5 mb-4">
-            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">Trip Status</div>
+            <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">وضعیت سفر</div>
             <div class="timeline">
               <div
                 v-for="(step, i) in timeline"
@@ -208,12 +208,12 @@
             </div>
           </v-card>
 
-          <!-- Payment note -->
+          <!-- راهنمای پرداخت -->
           <v-alert type="info" variant="tonal" rounded="xl">
-            <div class="text-body-2 font-weight-bold mb-1">Payment Instructions</div>
+            <div class="text-body-2 font-weight-bold mb-1">راهنمای پرداخت</div>
             <div class="text-caption">
-              Collect payment in cash at the end of the trip.
-              The fare shown is {{ trip.finalFare ? 'the final amount set by admin' : 'an estimate — confirm with admin if needed' }}.
+              پرداخت را به صورت نقدی در پایان سفر دریافت کنید.
+              کرایه نشان داده شده {{ trip.finalFare ? 'مبلغ نهایی تعیین شده توسط ادمین است' : 'یک تخمین است — در صورت نیاز با ادمین تأیید کنید' }}.
             </div>
           </v-alert>
         </v-col>
@@ -254,7 +254,7 @@ async function fetchTrip() {
   } finally { loading.value = false }
 }
 
-// ── Neshan SDK ────────────────────────────────────────────────────────────────
+// ── SDK نشان ────────────────────────────────────────────────────────────────
 const loadNeshanSDK = () => {
   const loadLink = (href: string) => {
     if (document.querySelector(`link[href="${href}"]`)) return
@@ -290,12 +290,12 @@ const initMap = () => {
   })
 
   neshanMap.on('load', () => {
-    // Pickup marker
+    // نشانگر سوار شدن
     new nmp.Marker({ color: '#4CAF50' })
       .setLngLat([trip.value.pickupLng, trip.value.pickupLat])
       .addTo(neshanMap)
 
-    // Dropoff marker
+    // نشانگر پیاده شدن
     new nmp.Marker({ color: '#F44336' })
       .setLngLat([trip.value.dropoffLng, trip.value.dropoffLat])
       .addTo(neshanMap)
@@ -347,16 +347,16 @@ const drawRoute = async () => {
       [trip.value.dropoffLng, trip.value.dropoffLat],
     )
     neshanMap.fitBounds(bounds, { padding: 60 })
-  } catch (e) { console.error('Route error', e) }
+  } catch (e) { console.error('خطا در مسیر', e) }
 }
 
-// ── Status helpers ─────────────────────────────────────────────────────────────
+// ── راهنماهای وضعیت ─────────────────────────────────────────────────────────────
 const timeline = [
-  { status: 'pending',     label: 'Assigned to You',  icon: 'mdi-clock-outline',   desc: 'You have been assigned this trip' },
-  { status: 'confirmed',   label: 'Confirmed',         icon: 'mdi-check-circle',    desc: 'Trip confirmed, customer notified' },
-  { status: 'in_progress', label: 'Trip In Progress',  icon: 'mdi-car',             desc: 'You picked up the customer' },
-  { status: 'completed',   label: 'Trip Completed',    icon: 'mdi-flag-checkered',  desc: 'Fare collected, trip finished' },
-  { status: 'cancelled',   label: 'Cancelled',         icon: 'mdi-close-circle',    desc: 'Trip was cancelled' },
+  { status: 'pending',     label: 'اختصاص به شما',  icon: 'mdi-clock-outline',   desc: 'این سفر به شما اختصاص داده شده است' },
+  { status: 'confirmed',   label: 'تأیید شده',         icon: 'mdi-check-circle',    desc: 'سفر تأیید شد، مشتری مطلع شد' },
+  { status: 'in_progress', label: 'سفر در حال انجام',  icon: 'mdi-car',             desc: 'مشتری را سوار کردید' },
+  { status: 'completed',   label: 'سفر تکمیل شد',    icon: 'mdi-flag-checkered',  desc: 'کرایه دریافت شد، سفر تمام شد' },
+  { status: 'cancelled',   label: 'لغو شد',         icon: 'mdi-close-circle',    desc: 'سفر لغو شد' },
 ]
 
 const statusOrder = ['pending', 'confirmed', 'in_progress', 'completed']

@@ -2,14 +2,14 @@
   <div>
     <div class="driver-hero pa-8 mb-6">
       <v-container>
-        <div class="text-overline text-primary font-weight-bold mb-1">Driver Portal</div>
-        <h1 class="text-h4 font-weight-bold text-secondary">My Profile</h1>
-        <p class="text-body-2 text-grey mt-1">Your account and vehicle information</p>
+        <div class="text-overline text-primary font-weight-bold mb-1">پنل راننده</div>
+        <h1 class="text-h4 font-weight-bold text-secondary">پروفایل من</h1>
+        <p class="text-body-2 text-grey mt-1">اطلاعات حساب و خودروی شما</p>
       </v-container>
     </div>
 
     <v-container style="max-width:760px">
-      <!-- Profile header -->
+      <!-- هدر پروفایل -->
       <v-card rounded="xl" class="pa-6 mb-4">
         <div class="d-flex align-center gap-4 flex-wrap">
           <v-avatar color="primary" size="80">
@@ -39,29 +39,29 @@
         </div>
       </v-card>
 
-      <!-- Info sections -->
+      <!-- بخش‌های اطلاعات -->
       <v-row>
         <v-col cols="12" md="6">
           <v-card rounded="xl" class="pa-5 h-100">
             <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">
               <v-icon color="primary" class="mr-2">mdi-account</v-icon>
-              Personal Info
+              اطلاعات شخصی
             </div>
             <v-list density="compact" class="pa-0">
               <v-list-item prepend-icon="mdi-account" class="px-0">
-                <template #title><span class="text-caption text-grey">Full Name</span></template>
+                <template #title><span class="text-caption text-grey">نام کامل</span></template>
                 <template #subtitle>{{ driverStore.driver?.fullName }}</template>
               </v-list-item>
               <v-list-item prepend-icon="mdi-phone" class="px-0">
-                <template #title><span class="text-caption text-grey">Phone</span></template>
+                <template #title><span class="text-caption text-grey">تلفن</span></template>
                 <template #subtitle>{{ driverStore.driver?.phone }}</template>
               </v-list-item>
               <v-list-item prepend-icon="mdi-email" class="px-0">
-                <template #title><span class="text-caption text-grey">Email</span></template>
+                <template #title><span class="text-caption text-grey">ایمیل</span></template>
                 <template #subtitle>{{ driverStore.driver?.email || '—' }}</template>
               </v-list-item>
               <v-list-item prepend-icon="mdi-card-account-details" class="px-0">
-                <template #title><span class="text-caption text-grey">License Number</span></template>
+                <template #title><span class="text-caption text-grey">شماره گواهینامه</span></template>
                 <template #subtitle>{{ driverStore.driver?.licenseNumber || '—' }}</template>
               </v-list-item>
             </v-list>
@@ -72,15 +72,15 @@
           <v-card rounded="xl" class="pa-5 h-100">
             <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">
               <v-icon color="primary" class="mr-2">mdi-car</v-icon>
-              Vehicle Info
+              اطلاعات خودرو
             </div>
             <v-list density="compact" class="pa-0">
               <v-list-item prepend-icon="mdi-car" class="px-0">
-                <template #title><span class="text-caption text-grey">Model</span></template>
+                <template #title><span class="text-caption text-grey">مدل</span></template>
                 <template #subtitle>{{ driverStore.driver?.carModel }}</template>
               </v-list-item>
               <v-list-item prepend-icon="mdi-card-text" class="px-0">
-                <template #title><span class="text-caption text-grey">Plate Number</span></template>
+                <template #title><span class="text-caption text-grey">شماره پلاک</span></template>
                 <template #subtitle>
                   <v-chip size="x-small" color="primary" variant="tonal">
                     {{ driverStore.driver?.carPlate }}
@@ -88,11 +88,11 @@
                 </template>
               </v-list-item>
               <v-list-item prepend-icon="mdi-palette" class="px-0">
-                <template #title><span class="text-caption text-grey">Color</span></template>
+                <template #title><span class="text-caption text-grey">رنگ</span></template>
                 <template #subtitle>{{ driverStore.driver?.carColor || '—' }}</template>
               </v-list-item>
               <v-list-item prepend-icon="mdi-calendar" class="px-0">
-                <template #title><span class="text-caption text-grey">Year</span></template>
+                <template #title><span class="text-caption text-grey">سال</span></template>
                 <template #subtitle>{{ driverStore.driver?.carYear || '—' }}</template>
               </v-list-item>
             </v-list>
@@ -100,11 +100,11 @@
         </v-col>
       </v-row>
 
-      <!-- Stats -->
+      <!-- آمار -->
       <v-card rounded="xl" class="pa-5 mt-4">
         <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">
           <v-icon color="primary" class="mr-2">mdi-chart-bar</v-icon>
-          My Stats
+          آمار من
         </div>
         <v-row>
           <v-col v-for="stat in statCards" :key="stat.label" cols="6" md="3" class="text-center">
@@ -114,10 +114,10 @@
         </v-row>
       </v-card>
 
-      <!-- Note -->
+      <!-- نکته -->
       <v-alert type="info" variant="tonal" rounded="xl" class="mt-4">
         <div class="text-body-2">
-          To update your profile or vehicle information, please contact your admin or dispatcher.
+          برای به‌روزرسانی اطلاعات پروفایل یا خودرو، با ادمین یا dispatcher خود تماس بگیرید.
         </div>
       </v-alert>
     </v-container>
@@ -137,9 +137,9 @@ onMounted(async () => {
 })
 
 const statCards = computed(() => [
-  { label: 'Total Trips',   value: driverStore.stats?.total     ?? 0, color: 'secondary' },
-  { label: 'Completed',     value: driverStore.stats?.completed ?? 0, color: 'success' },
-  { label: 'Upcoming',      value: driverStore.stats?.upcoming  ?? 0, color: 'primary' },
+  { label: 'کل سفرها',   value: driverStore.stats?.total     ?? 0, color: 'secondary' },
+  { label: 'تکمیل شده',     value: driverStore.stats?.completed ?? 0, color: 'success' },
+  { label: 'پیش‌رو',      value: driverStore.stats?.upcoming  ?? 0, color: 'primary' },
   { label: 'درآمد کل', value: formatToman(driverStore.stats?.totalEarnings ?? 0), color: 'primary' },
 ])
 </script>

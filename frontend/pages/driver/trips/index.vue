@@ -2,14 +2,14 @@
   <div>
     <div class="driver-hero pa-8 mb-6">
       <v-container>
-        <div class="text-overline text-primary font-weight-bold mb-1">Driver Portal</div>
-        <h1 class="text-h4 font-weight-bold text-secondary">My Trips</h1>
-        <p class="text-body-2 text-grey mt-1">All assigned trips and their details</p>
+        <div class="text-overline text-primary font-weight-bold mb-1">پنل راننده</div>
+        <h1 class="text-h4 font-weight-bold text-secondary">سفرهای من</h1>
+        <p class="text-body-2 text-grey mt-1">همه سفرهای اختصاص داده شده و جزئیات آنها</p>
       </v-container>
     </div>
 
     <v-container>
-      <!-- Filter tabs -->
+      <!-- فیلتر برگه‌ها -->
       <v-tabs v-model="activeTab" color="primary" class="mb-6">
         <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
           {{ tab.label }}
@@ -24,21 +24,21 @@
         </v-tab>
       </v-tabs>
 
-      <!-- Loading -->
+      <!-- در حال بارگذاری -->
       <div v-if="driverStore.loading" class="d-flex justify-center pa-16">
         <v-progress-circular indeterminate color="primary" size="48" />
       </div>
 
-      <!-- Empty -->
+      <!-- خالی -->
       <div v-else-if="filteredTrips.length === 0" class="text-center pa-16">
         <v-icon size="72" color="grey-lighten-2" class="mb-4">mdi-car-off</v-icon>
-        <div class="text-h6 text-grey mb-2">No trips found</div>
+        <div class="text-h6 text-grey mb-2">هیچ سفری یافت نشد</div>
         <div class="text-body-2 text-grey">
-          {{ activeTab === 'all' ? 'No trips assigned to you yet.' : `No ${activeTab} trips.` }}
+          {{ activeTab === 'all' ? 'هنوز هیچ سفری به شما اختصاص داده نشده است.' : `هیچ سفری با وضعیت ${activeTab} وجود ندارد.` }}
         </div>
       </div>
 
-      <!-- Trips grid -->
+      <!-- شبکه سفرها -->
       <v-row v-else>
         <v-col
           v-for="trip in filteredTrips"
@@ -51,11 +51,11 @@
             class="trip-card"
             @click="navigateTo(`/driver/trips/${trip.id}`)"
           >
-            <!-- Status bar -->
+            <!-- نوار وضعیت -->
             <div class="status-bar" :style="{ background: statusGradient(trip.status) }" />
 
             <div class="pa-5">
-              <!-- Header -->
+              <!-- هدر -->
               <div class="d-flex align-start justify-space-between mb-4">
                 <div>
                   <v-chip :color="statusColor(trip.status)" size="small" label class="mb-2">
@@ -70,11 +70,11 @@
                   <div class="text-h6 font-weight-bold text-primary">
                     {{ formatToman(trip.finalFare || trip.estimatedFare) }}
                   </div>
-                  <div class="text-caption text-grey">{{ trip.distanceKm }} km</div>
+                  <div class="text-caption text-grey">{{ trip.distanceKm }} کیلومتر</div>
                 </div>
               </div>
 
-              <!-- Route -->
+              <!-- مسیر -->
               <div class="d-flex align-start gap-3 mb-4">
                 <div class="d-flex flex-column align-center mt-1 flex-shrink-0">
                   <v-icon color="success" size="12">mdi-circle</v-icon>
@@ -93,7 +93,7 @@
 
               <v-divider class="mb-3" />
 
-              <!-- Footer -->
+              <!-- پاورقی -->
               <div class="d-flex align-center justify-space-between">
                 <div class="d-flex align-center gap-1">
                   <v-icon size="14" color="grey">mdi-calendar-clock</v-icon>
@@ -130,11 +130,11 @@ onMounted(async () => {
 const activeTab = ref('all')
 
 const tabs = [
-  { label: 'All',         value: 'all',         color: 'secondary' },
-  { label: 'Upcoming',    value: 'confirmed',    color: 'info' },
-  { label: 'In Progress', value: 'in_progress',  color: 'primary' },
-  { label: 'Completed',   value: 'completed',    color: 'success' },
-  { label: 'Cancelled',   value: 'cancelled',    color: 'error' },
+  { label: 'همه',         value: 'all',         color: 'secondary' },
+  { label: 'پیش‌رو',    value: 'confirmed',    color: 'info' },
+  { label: 'در حال انجام', value: 'in_progress',  color: 'primary' },
+  { label: 'تکمیل شده',   value: 'completed',    color: 'success' },
+  { label: 'لغو شده',   value: 'cancelled',    color: 'error' },
 ]
 
 const filteredTrips = computed(() => {

@@ -1,26 +1,26 @@
 <template>
   <div>
     <div class="mb-6">
-      <div class="text-h5 font-weight-bold text-secondary">Reports</div>
-      <div class="text-body-2 text-grey">Overview of bookings, revenue, and activity</div>
+      <div class="text-h5 font-weight-bold text-secondary">گزارش‌ها</div>
+      <div class="text-body-2 text-grey">خلاصه رزروها، درآمد و فعالیت</div>
     </div>
 
-    <!-- Date range filter -->
+    <!-- فیلتر بازه زمانی -->
     <v-card rounded="xl" class="pa-4 mb-6">
       <div class="d-flex align-center gap-3 flex-wrap">
         <v-btn-toggle v-model="period" color="primary" variant="outlined" density="compact" rounded="lg" mandatory>
-          <v-btn value="7" size="small">Last 7 days</v-btn>
-          <v-btn value="30" size="small">Last 30 days</v-btn>
-          <v-btn value="90" size="small">Last 90 days</v-btn>
+          <v-btn value="7" size="small">۷ روز اخیر</v-btn>
+          <v-btn value="30" size="small">۳۰ روز اخیر</v-btn>
+          <v-btn value="90" size="small">۹۰ روز اخیر</v-btn>
         </v-btn-toggle>
         <v-spacer />
         <v-btn variant="tonal" color="primary" prepend-icon="mdi-refresh" size="small" @click="loadData">
-          Refresh
+          بروزرسانی
         </v-btn>
       </div>
     </v-card>
 
-    <!-- KPI Cards -->
+    <!-- کارت‌های KPI -->
     <v-row class="mb-6">
       <v-col v-for="kpi in kpiCards" :key="kpi.label" cols="6" md="3">
         <v-card rounded="xl" class="pa-5">
@@ -44,10 +44,10 @@
     </v-row>
 
     <v-row>
-      <!-- Bookings by status (donut) -->
+      <!-- رزروها بر اساس وضعیت (دونات) -->
       <v-col cols="12" md="5">
         <v-card rounded="xl" class="pa-5 h-100">
-          <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">Bookings by Status</div>
+          <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">رزروها بر اساس وضعیت</div>
           <div class="d-flex justify-center mb-4">
             <div style="position:relative;width:200px;height:200px">
               <svg viewBox="0 0 200 200" width="200" height="200">
@@ -69,7 +69,7 @@
               </svg>
               <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)" class="text-center">
                 <div class="text-h5 font-weight-bold text-secondary">{{ stats?.total ?? 0 }}</div>
-                <div class="text-caption text-grey">Total</div>
+                <div class="text-caption text-grey">کل</div>
               </div>
             </div>
           </div>
@@ -90,12 +90,12 @@
         </v-card>
       </v-col>
 
-      <!-- Daily bookings bar chart -->
+      <!-- نمودار میله‌ای رزروهای روزانه -->
       <v-col cols="12" md="7">
         <v-card rounded="xl" class="pa-5 h-100">
           <div class="d-flex align-center justify-space-between mb-4">
-            <div class="text-subtitle-1 font-weight-bold text-secondary">Daily Bookings</div>
-            <v-chip size="small" color="primary" variant="tonal">Last {{ period }} days</v-chip>
+            <div class="text-subtitle-1 font-weight-bold text-secondary">رزروهای روزانه</div>
+            <v-chip size="small" color="primary" variant="tonal">آخرین {{ period }} روز</v-chip>
           </div>
 
           <div v-if="dailyData.length === 0" class="d-flex align-center justify-center" style="height:200px">
@@ -131,12 +131,12 @@
       </v-col>
     </v-row>
 
-    <!-- Revenue + Top drivers -->
+    <!-- خلاصه درآمد + رانندگان برتر -->
     <v-row class="mt-4">
-      <!-- Revenue summary -->
+      <!-- خلاصه درآمد -->
       <v-col cols="12" md="4">
         <v-card rounded="xl" class="pa-5 h-100">
-          <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">Revenue Summary</div>
+          <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">خلاصه درآمد</div>
           <v-list density="compact">
             <v-list-item v-for="rev in revenueSummary" :key="rev.label" class="px-0">
               <template #prepend>
@@ -155,12 +155,12 @@
         </v-card>
       </v-col>
 
-      <!-- Recent bookings table -->
+      <!-- جدول رزروهای اخیر -->
       <v-col cols="12" md="8">
         <v-card rounded="xl" class="pa-0">
           <div class="pa-5 d-flex align-center justify-space-between">
-            <div class="text-subtitle-1 font-weight-bold text-secondary">Recent Bookings</div>
-            <v-btn variant="text" color="primary" to="/admin/bookings" size="small">View All</v-btn>
+            <div class="text-subtitle-1 font-weight-bold text-secondary">رزروهای اخیر</div>
+            <v-btn variant="text" color="primary" to="/admin/bookings" size="small">مشاهده همه</v-btn>
           </div>
           <v-divider />
           <v-data-table
@@ -215,27 +215,27 @@ async function loadData() {
   } finally { loading.value = false }
 }
 
-// ── KPI Cards ──────────────────────────────────────────────────────────────────
+// ── کارت‌های KPI ──────────────────────────────────────────────────────────────────
 const kpiCards = computed(() => [
-  { label: 'Total Bookings', value: stats.value?.total ?? 0, icon: 'mdi-calendar-check', color: 'primary', trend: 12 },
-  { label: 'Completed Rides', value: stats.value?.completed ?? 0, icon: 'mdi-flag-checkered', color: 'success', trend: 8 },
+  { label: 'کل رزروها', value: stats.value?.total ?? 0, icon: 'mdi-calendar-check', color: 'primary', trend: 12 },
+  { label: 'سفرهای تکمیل شده', value: stats.value?.completed ?? 0, icon: 'mdi-flag-checkered', color: 'success', trend: 8 },
   { label: 'درآمد کل', value: stats.value ? formatTomanCompact(stats.value.totalRevenue ?? 0) : '—', icon: 'mdi-cash', color: 'info', trend: 15 },
-  { label: 'Cancellation Rate', value: stats.value?.total ? `${Math.round((stats.value.cancelled / stats.value.total) * 100)}%` : '0%', icon: 'mdi-close-circle', color: 'error', trend: -3 },
+  { label: 'نرخ لغو', value: stats.value?.total ? `${Math.round((stats.value.cancelled / stats.value.total) * 100)}%` : '۰%', icon: 'mdi-close-circle', color: 'error', trend: -3 },
 ])
 
-// ── Status Breakdown (donut) ───────────────────────────────────────────────────
+// ── تفکیک وضعیت (دونات) ───────────────────────────────────────────────────
 const statusBreakdown = computed(() => [
-  { label: 'Pending', count: stats.value?.pending ?? 0, color: '#FF9800', chipColor: 'warning' },
-  { label: 'Confirmed', count: stats.value?.confirmed ?? 0, color: '#2196F3', chipColor: 'info' },
-  { label: 'Completed', count: stats.value?.completed ?? 0, color: '#4CAF50', chipColor: 'success' },
-  { label: 'Cancelled', count: stats.value?.cancelled ?? 0, color: '#F44336', chipColor: 'error' },
+  { label: 'در انتظار', count: stats.value?.pending ?? 0, color: '#FF9800', chipColor: 'warning' },
+  { label: 'تأیید شده', count: stats.value?.confirmed ?? 0, color: '#2196F3', chipColor: 'info' },
+  { label: 'تکمیل شده', count: stats.value?.completed ?? 0, color: '#4CAF50', chipColor: 'success' },
+  { label: 'لغو شده', count: stats.value?.cancelled ?? 0, color: '#F44336', chipColor: 'error' },
 ])
 
 const circumference = 2 * Math.PI * 80 // ≈ 502
 
 const donutSegments = computed(() => {
   const total = stats.value?.total || 1
-  let offset = circumference * 0.25 // start at top
+  let offset = circumference * 0.25 // شروع از بالا
   return statusBreakdown.value.map((item) => {
     const dash = (item.count / total) * circumference
     const seg = { color: item.color, dash, offset: -offset + circumference }
@@ -244,7 +244,7 @@ const donutSegments = computed(() => {
   })
 })
 
-// ── Daily chart ────────────────────────────────────────────────────────────────
+// ── نمودار روزانه ────────────────────────────────────────────────────────────────
 const dailyData = computed(() => {
   const days = parseInt(period.value)
   const result = []
@@ -256,7 +256,7 @@ const dailyData = computed(() => {
       new Date(b.createdAt).toISOString().slice(0, 10) === dateStr,
     ).length
     result.push({
-      label: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
+      label: d.toLocaleDateString('fa', { month: 'short', day: 'numeric' }),
       count,
     })
   }
@@ -265,7 +265,7 @@ const dailyData = computed(() => {
 
 const maxDaily = computed(() => Math.max(...dailyData.value.map((d) => d.count), 1))
 
-// ── Revenue summary ────────────────────────────────────────────────────────────
+// ── خلاصه درآمد ────────────────────────────────────────────────────────────
 const revenueSummary = computed(() => {
   const completed = allBookings.value.filter((b) => b.status === 'completed')
   const totalRev = completed.reduce((sum, b) => sum + parseFloat(b.finalFare || b.estimatedFare || 0), 0)
@@ -276,21 +276,21 @@ const revenueSummary = computed(() => {
   return [
     { label: 'درآمد کل', value: formatToman(totalRev), icon: 'mdi-cash-multiple', color: 'success' },
     { label: 'میانگین کرایه', value: formatToman(avgFare), icon: 'mdi-cash', color: 'primary' },
-    { label: 'Avg. Distance', value: `${avgDist} km`, icon: 'mdi-map-marker-distance', color: 'info' },
-    { label: 'Completed Trips', value: completed.length, icon: 'mdi-check-circle', color: 'secondary' },
+    { label: 'میانگین مسافت', value: `${avgDist} کیلومتر`, icon: 'mdi-map-marker-distance', color: 'info' },
+    { label: 'سفرهای تکمیل شده', value: completed.length, icon: 'mdi-check-circle', color: 'secondary' },
   ]
 })
 
-// ── Recent bookings ────────────────────────────────────────────────────────────
+// ── رزروهای اخیر ────────────────────────────────────────────────────────────
 const recentBookings = computed(() =>
   [...allBookings.value].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 8),
 )
 
 const recentHeaders = [
-  { title: 'Customer', key: 'user', sortable: false },
-  { title: 'Date', key: 'createdAt', sortable: true },
-  { title: 'Fare', key: 'estimatedFare', sortable: true },
-  { title: 'Status', key: 'status', sortable: true },
+  { title: 'مشتری', key: 'user', sortable: false },
+  { title: 'تاریخ', key: 'createdAt', sortable: true },
+  { title: 'کرایه', key: 'estimatedFare', sortable: true },
+  { title: 'وضعیت', key: 'status', sortable: true },
 ]
 
 const statusColor = (s: string) =>

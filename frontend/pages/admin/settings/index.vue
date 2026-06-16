@@ -1,12 +1,12 @@
 <template>
   <div>
     <div class="mb-6">
-      <div class="text-h5 font-weight-bold text-secondary">Settings</div>
-      <div class="text-body-2 text-grey">Configure system-wide settings</div>
+      <div class="text-h5 font-weight-bold text-secondary">تنظیمات</div>
+      <div class="text-body-2 text-grey">تنظیمات سیستم</div>
     </div>
 
     <v-row>
-      <!-- Pricing -->
+      <!-- قیمت‌گذاری -->
       <v-col cols="12" md="6">
         <v-card rounded="xl" class="pa-6 mb-4">
           <div class="d-flex align-center gap-3 mb-5">
@@ -14,12 +14,12 @@
               <v-icon color="white">mdi-cash</v-icon>
             </v-avatar>
             <div>
-              <div class="text-subtitle-1 font-weight-bold text-secondary">Pricing</div>
-              <div class="text-caption text-grey">Fare and rate configuration</div>
+              <div class="text-subtitle-1 font-weight-bold text-secondary">قیمت‌گذاری</div>
+              <div class="text-caption text-grey">تنظیمات کرایه و نرخ‌ها</div>
             </div>
           </div>
           <v-form @submit.prevent="savePricing">
-            <div class="text-caption text-grey font-weight-bold mb-3">BASE FARE SETTINGS</div>
+            <div class="text-caption text-grey font-weight-bold mb-3">تنظیمات کرایه پایه</div>
             <v-text-field
               v-model="pricing.farePerKm"
               label="کرایه هر کیلومتر (تومان)"
@@ -42,7 +42,7 @@
               prepend-inner-icon="mdi-tag"
               variant="outlined"
               rounded="lg"
-              hint="Added to every booking regardless of distance"
+              hint="به هر رزرو اضافه می‌شود بدون توجه به مسافت"
               persistent-hint
               class="mb-4"
             />
@@ -55,47 +55,47 @@
               prepend-inner-icon="mdi-arrow-down-circle"
               variant="outlined"
               rounded="lg"
-              hint="No booking can be lower than this amount"
+              hint="هیچ رزروی کمتر از این مبلغ نخواهد بود"
               persistent-hint
               class="mb-5"
             />
-            <!-- Fare preview -->
+            <!-- پیش‌نمایش کرایه -->
             <v-card color="primary" variant="tonal" rounded="lg" class="pa-4 mb-5">
-              <div class="text-caption font-weight-bold text-primary mb-2">FARE PREVIEW</div>
+              <div class="text-caption font-weight-bold text-primary mb-2">پیش‌نمایش کرایه</div>
               <v-row dense>
                 <v-col v-for="ex in fareExamples" :key="ex.km" cols="4" class="text-center">
                   <div class="text-body-2 font-weight-bold text-secondary">{{ calculatedFare(ex.km) }}</div>
-                  <div class="text-caption text-grey">{{ ex.km }} km</div>
+                  <div class="text-caption text-grey">{{ ex.km }} کیلومتر</div>
                 </v-col>
               </v-row>
             </v-card>
-            <v-alert v-if="pricingSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="Pricing settings saved." />
+            <v-alert v-if="pricingSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="تنظیمات قیمت ذخیره شد." />
             <v-alert v-if="pricingError"   type="error"   variant="tonal" rounded="lg" class="mb-3" :text="pricingError" />
             <v-btn type="submit" color="primary" block :loading="savingPricing" prepend-icon="mdi-content-save">
-              Save Pricing
+              ذخیره قیمت‌گذاری
             </v-btn>
           </v-form>
         </v-card>
       </v-col>
 
-      <!-- Right column -->
+      <!-- ستون راست -->
       <v-col cols="12" md="6">
 
-        <!-- ── Feature 2: Cancellation Policy ── -->
+        <!-- ── ویژگی ۲: سیاست لغو ── -->
         <v-card rounded="xl" class="pa-6 mb-4">
           <div class="d-flex align-center gap-3 mb-5">
             <v-avatar color="error" size="44" rounded="lg">
               <v-icon color="white">mdi-cancel</v-icon>
             </v-avatar>
             <div>
-              <div class="text-subtitle-1 font-weight-bold text-secondary">Cancellation Policy</div>
-              <div class="text-caption text-grey">Control when customers can cancel</div>
+              <div class="text-subtitle-1 font-weight-bold text-secondary">سیاست لغو</div>
+              <div class="text-caption text-grey">کنترل زمان لغو مشتریان</div>
             </div>
           </div>
           <v-form @submit.prevent="saveCancellation">
             <v-text-field
               v-model="cancellation.deadlineMinutes"
-              label="Cancellation Deadline (minutes before trip)"
+              label="مهلت لغو (دقیقه قبل از سفر)"
               type="number"
               min="0"
               prepend-inner-icon="mdi-clock-alert"
@@ -105,43 +105,43 @@
             />
             <v-alert type="info" variant="tonal" rounded="lg" density="compact" class="mb-4">
               <div class="text-caption">
-                <strong>{{ cancellation.deadlineMinutes }} minutes</strong> before the scheduled pickup,
-                customers will no longer be able to self-cancel.
-                Set to <strong>0</strong> to allow cancellations at any time.
+                <strong>{{ cancellation.deadlineMinutes }} دقیقه</strong> قبل از زمان سوار شدن برنامه‌ریزی شده،
+                مشتریان دیگر نمی‌توانند خودشان لغو کنند.
+                برای اجازه لغو در هر زمان، <strong>۰</strong> را تنظیم کنید.
               </div>
             </v-alert>
-            <!-- Examples -->
+            <!-- مثال‌ها -->
             <v-card color="grey-lighten-5" rounded="lg" class="pa-3 mb-5">
-              <div class="text-caption font-weight-bold text-grey mb-2">EXAMPLES</div>
+              <div class="text-caption font-weight-bold text-grey mb-2">مثال‌ها</div>
               <div v-for="ex in cancellationExamples" :key="ex.label" class="d-flex justify-space-between text-caption py-1">
-                <span class="text-grey">Trip at {{ ex.label }}</span>
+                <span class="text-grey">سفر در {{ ex.label }}</span>
                 <span :class="ex.allowed ? 'text-success font-weight-bold' : 'text-error font-weight-bold'">
-                  {{ ex.allowed ? '✓ Can cancel' : '✗ Cannot cancel' }}
+                  {{ ex.allowed ? '✓ می‌تواند لغو کند' : '✗ نمی‌تواند لغو کند' }}
                 </span>
               </div>
             </v-card>
-            <v-alert v-if="cancellationSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="Cancellation policy saved." />
+            <v-alert v-if="cancellationSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="سیاست لغو ذخیره شد." />
             <v-btn type="submit" color="error" block :loading="savingCancellation" prepend-icon="mdi-content-save">
-              Save Policy
+              ذخیره سیاست
             </v-btn>
           </v-form>
         </v-card>
 
-        <!-- ── Feature 3: Driver Availability Buffer ── -->
+        <!-- ── ویژگی ۳: در دسترس بودن راننده ── -->
         <v-card rounded="xl" class="pa-6 mb-4">
           <div class="d-flex align-center gap-3 mb-5">
             <v-avatar color="info" size="44" rounded="lg">
               <v-icon color="white">mdi-car-clock</v-icon>
             </v-avatar>
             <div>
-              <div class="text-subtitle-1 font-weight-bold text-secondary">Driver Availability</div>
-              <div class="text-caption text-grey">Conflict detection buffer window</div>
+              <div class="text-subtitle-1 font-weight-bold text-secondary">دسترسی راننده</div>
+              <div class="text-caption text-grey">پنجره بافر تشخیص تداخل</div>
             </div>
           </div>
           <v-form @submit.prevent="saveDriverBuffer">
             <v-text-field
               v-model="driverBuffer.minutes"
-              label="Buffer Window (minutes)"
+              label="پنجره بافر (دقیقه)"
               type="number"
               min="0"
               prepend-inner-icon="mdi-timer-sand"
@@ -151,60 +151,60 @@
             />
             <v-alert type="info" variant="tonal" rounded="lg" density="compact" class="mb-4">
               <div class="text-caption">
-                When assigning a driver, the system checks for existing bookings within
-                <strong>±{{ driverBuffer.minutes }} minutes</strong> of the new trip's scheduled time.
-                If a conflict is found, the driver cannot be assigned.
+                هنگام اختصاص راننده، سیستم برای رزروهای موجود در بازه
+                <strong>±{{ driverBuffer.minutes }} دقیقه</strong> از زمان برنامه‌ریزی شده سفر جدید بررسی می‌کند.
+                اگر تداخلی پیدا شود، راننده نمی‌تواند اختصاص داده شود.
               </div>
             </v-alert>
-            <!-- Visual buffer example -->
+            <!-- مثال تصویری بافر -->
             <v-card color="grey-lighten-5" rounded="lg" class="pa-3 mb-5">
-              <div class="text-caption font-weight-bold text-grey mb-2">HOW IT WORKS</div>
+              <div class="text-caption font-weight-bold text-grey mb-2">نحوه عملکرد</div>
               <div class="d-flex align-center gap-2 text-caption">
                 <v-icon color="error" size="14">mdi-block-helper</v-icon>
-                <span class="text-grey">Blocked zone:</span>
-                <v-chip size="x-small" color="error" variant="tonal">-{{ driverBuffer.minutes }}min</v-chip>
-                <span class="text-grey">to</span>
-                <v-chip size="x-small" color="primary" variant="tonal">Trip time</v-chip>
-                <span class="text-grey">to</span>
-                <v-chip size="x-small" color="error" variant="tonal">+{{ driverBuffer.minutes }}min</v-chip>
+                <span class="text-grey">منطقه مسدود:</span>
+                <v-chip size="x-small" color="error" variant="tonal">-{{ driverBuffer.minutes }}دقیقه</v-chip>
+                <span class="text-grey">تا</span>
+                <v-chip size="x-small" color="primary" variant="tonal">زمان سفر</v-chip>
+                <span class="text-grey">تا</span>
+                <v-chip size="x-small" color="error" variant="tonal">+{{ driverBuffer.minutes }}دقیقه</v-chip>
               </div>
             </v-card>
-            <v-alert v-if="bufferSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="Driver buffer setting saved." />
+            <v-alert v-if="bufferSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="تنظیمات بافر راننده ذخیره شد." />
             <v-btn type="submit" color="info" block :loading="savingBuffer" prepend-icon="mdi-content-save">
-              Save Buffer
+              ذخیره بافر
             </v-btn>
           </v-form>
         </v-card>
 
-        <!-- General settings -->
+        <!-- تنظیمات عمومی -->
         <v-card rounded="xl" class="pa-6 mb-4">
           <div class="d-flex align-center gap-3 mb-5">
             <v-avatar color="secondary" size="44" rounded="lg">
               <v-icon color="white">mdi-cog</v-icon>
             </v-avatar>
             <div>
-              <div class="text-subtitle-1 font-weight-bold text-secondary">General</div>
-              <div class="text-caption text-grey">Booking and notification settings</div>
+              <div class="text-subtitle-1 font-weight-bold text-secondary">عمومی</div>
+              <div class="text-caption text-grey">تنظیمات رزرو و اعلان‌ها</div>
             </div>
           </div>
           <v-form @submit.prevent="saveGeneral">
-            <div class="text-caption text-grey font-weight-bold mb-3">BOOKING</div>
-            <v-text-field v-model="general.minAdvanceMinutes" label="Min Advance Booking (minutes)" type="number" min="0" prepend-inner-icon="mdi-clock-fast" variant="outlined" rounded="lg" class="mb-3" />
-            <v-text-field v-model="general.maxPassengers" label="Max Passengers" type="number" min="1" max="20" prepend-inner-icon="mdi-account-group" variant="outlined" rounded="lg" class="mb-3" />
+            <div class="text-caption text-grey font-weight-bold mb-3">رزرو</div>
+            <v-text-field v-model="general.minAdvanceMinutes" label="حداقل زمان پیش‌رزرو (دقیقه)" type="number" min="0" prepend-inner-icon="mdi-clock-fast" variant="outlined" rounded="lg" class="mb-3" />
+            <v-text-field v-model="general.maxPassengers" label="حداکثر مسافران" type="number" min="1" max="20" prepend-inner-icon="mdi-account-group" variant="outlined" rounded="lg" class="mb-3" />
             <v-divider class="mb-4" />
-            <div class="text-caption text-grey font-weight-bold mb-3">NOTIFICATIONS</div>
-            <v-switch v-model="general.smsOnBooking" label="SMS on new booking" color="primary" hide-details class="mb-2" />
-            <v-switch v-model="general.smsOnDriverAssigned" label="SMS when driver assigned" color="primary" hide-details class="mb-4" />
-            <v-alert v-if="generalSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="General settings saved." />
-            <v-btn type="submit" color="secondary" block :loading="savingGeneral" prepend-icon="mdi-content-save">Save Settings</v-btn>
+            <div class="text-caption text-grey font-weight-bold mb-3">اعلان‌ها</div>
+            <v-switch v-model="general.smsOnBooking" label="پیامک در رزرو جدید" color="primary" hide-details class="mb-2" />
+            <v-switch v-model="general.smsOnDriverAssigned" label="پیامک هنگام اختصاص راننده" color="primary" hide-details class="mb-4" />
+            <v-alert v-if="generalSuccess" type="success" variant="tonal" rounded="lg" class="mb-3" text="تنظیمات عمومی ذخیره شد." />
+            <v-btn type="submit" color="secondary" block :loading="savingGeneral" prepend-icon="mdi-content-save">ذخیره تنظیمات</v-btn>
           </v-form>
         </v-card>
 
-        <!-- All settings raw view -->
+        <!-- مشاهده خام همه تنظیمات -->
         <v-card rounded="xl" class="pa-6">
           <div class="d-flex align-center justify-space-between mb-4">
-            <div class="text-subtitle-1 font-weight-bold text-secondary">All Settings</div>
-            <v-btn size="small" variant="text" color="primary" prepend-icon="mdi-refresh" @click="loadSettings">Refresh</v-btn>
+            <div class="text-subtitle-1 font-weight-bold text-secondary">همه تنظیمات</div>
+            <v-btn size="small" variant="text" color="primary" prepend-icon="mdi-refresh" @click="loadSettings">بروزرسانی</v-btn>
           </div>
           <v-data-table :headers="settingsHeaders" :items="allSettings" :loading="loadingSettings" density="compact" hide-default-footer>
             <template #item.value="{ item }">
@@ -254,20 +254,20 @@ const calculatedFare = (km: number) => {
   return formatToman(Math.max(base + km * perKm, min))
 }
 
-// Show live cancellation examples based on current deadline setting
+// نمایش مثال‌های زنده لغو بر اساس تنظیمات مهلت فعلی
 const cancellationExamples = computed(() => {
   const deadline = parseInt(cancellation.value.deadlineMinutes || '0')
   return [
-    { label: `now + ${deadline + 30} min`, allowed: true },
-    { label: `now + ${deadline} min`,      allowed: false },
-    { label: `now + ${Math.max(0, deadline - 30)} min`, allowed: false },
+    { label: `اکنون + ${deadline + 30} دقیقه`, allowed: true },
+    { label: `اکنون + ${deadline} دقیقه`,      allowed: false },
+    { label: `اکنون + ${Math.max(0, deadline - 30)} دقیقه`, allowed: false },
   ]
 })
 
 const settingsHeaders = [
-  { title: 'Key',     key: 'key',       sortable: true },
-  { title: 'Value',   key: 'value',     sortable: false },
-  { title: 'Updated', key: 'updatedAt', sortable: true },
+  { title: 'کلید',     key: 'key',       sortable: true },
+  { title: 'مقدار',   key: 'value',     sortable: false },
+  { title: 'بروزرسانی', key: 'updatedAt', sortable: true },
 ]
 
 onMounted(loadSettings)
@@ -304,14 +304,14 @@ const savePricing = async () => {
       saveSetting('minimum_fare',  pricing.value.minimumFare,'حداقل کرایه برای هر سفر (تومان)'),
     ])
     flash(pricingSuccess); await loadSettings()
-  } catch (e: any) { pricingError.value = e.response?.data?.message || 'Failed to save' }
+  } catch (e: any) { pricingError.value = e.response?.data?.message || 'ذخیره ناموفق بود' }
   finally { savingPricing.value = false }
 }
 
 const saveCancellation = async () => {
   savingCancellation.value = true
   try {
-    await saveSetting('cancellation_deadline_minutes', cancellation.value.deadlineMinutes, 'Minutes before trip when customer cancellation is blocked (0 = always allowed)')
+    await saveSetting('cancellation_deadline_minutes', cancellation.value.deadlineMinutes, 'دقیقه قبل از سفر که لغو مشتری مسدود می‌شود (۰ = همیشه مجاز)')
     flash(cancellationSuccess); await loadSettings()
   } finally { savingCancellation.value = false }
 }
@@ -319,7 +319,7 @@ const saveCancellation = async () => {
 const saveDriverBuffer = async () => {
   savingBuffer.value = true
   try {
-    await saveSetting('driver_buffer_minutes', driverBuffer.value.minutes, 'Buffer window in minutes for driver availability conflict detection')
+    await saveSetting('driver_buffer_minutes', driverBuffer.value.minutes, 'پنجره بافر بر حسب دقیقه برای تشخیص تداخل در دسترس بودن راننده')
     flash(bufferSuccess); await loadSettings()
   } finally { savingBuffer.value = false }
 }
@@ -328,10 +328,10 @@ const saveGeneral = async () => {
   savingGeneral.value = true
   try {
     await Promise.all([
-      saveSetting('min_advance_minutes',       general.value.minAdvanceMinutes, 'Minimum booking advance time (minutes)'),
-      saveSetting('max_passengers',            general.value.maxPassengers,     'Maximum passengers per booking'),
-      saveSetting('sms_on_booking',            String(general.value.smsOnBooking),         'Send SMS on new booking'),
-      saveSetting('sms_on_driver_assigned',    String(general.value.smsOnDriverAssigned),  'Send SMS when driver assigned'),
+      saveSetting('min_advance_minutes',       general.value.minAdvanceMinutes, 'حداقل زمان پیش‌رزرو (دقیقه)'),
+      saveSetting('max_passengers',            general.value.maxPassengers,     'حداکثر مسافران در هر رزرو'),
+      saveSetting('sms_on_booking',            String(general.value.smsOnBooking),         'ارسال پیامک در رزرو جدید'),
+      saveSetting('sms_on_driver_assigned',    String(general.value.smsOnDriverAssigned),  'ارسال پیامک هنگام اختصاص راننده'),
     ])
     flash(generalSuccess); await loadSettings()
   } finally { savingGeneral.value = false }

@@ -2,14 +2,14 @@
   <div>
     <div class="booking-hero pa-8 mb-6">
       <v-container>
-        <div class="text-overline text-primary font-weight-bold mb-1">History</div>
-        <h1 class="text-h4 font-weight-bold text-secondary">My Trips</h1>
-        <p class="text-body-2 text-grey-darken-1 mt-1">All your past and upcoming bookings</p>
+        <div class="text-overline text-primary font-weight-bold mb-1">تاریخچه</div>
+        <h1 class="text-h4 font-weight-bold text-secondary">سفرهای من</h1>
+        <p class="text-body-2 text-grey-darken-1 mt-1">همه رزروهای گذشته و آینده شما</p>
       </v-container>
     </div>
 
     <v-container>
-      <!-- Filter tabs -->
+      <!-- فیلتر برگه‌ها -->
       <v-tabs v-model="activeTab" color="primary" class="mb-6">
         <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
           {{ tab.label }}
@@ -19,22 +19,22 @@
         </v-tab>
       </v-tabs>
 
-      <!-- Loading -->
+      <!-- در حال بارگذاری -->
       <div v-if="bookingsStore.loading" class="d-flex justify-center pa-12">
         <v-progress-circular indeterminate color="primary" size="48" />
       </div>
 
-      <!-- Empty -->
+      <!-- خالی -->
       <div v-else-if="filteredBookings.length === 0" class="text-center pa-16">
         <v-icon size="72" color="grey-lighten-2" class="mb-4">mdi-calendar-blank</v-icon>
-        <div class="text-h6 text-grey mb-2">No trips found</div>
+        <div class="text-h6 text-grey mb-2">هیچ سفری یافت نشد</div>
         <div class="text-body-2 text-grey mb-6">
-          {{ activeTab === 'all' ? "You haven't made any bookings yet." : `No ${activeTab} trips.` }}
+          {{ activeTab === 'all' ? "هنوز هیچ رزروی انجام نداده‌اید." : `هیچ سفری با وضعیت ${activeTab} وجود ندارد.` }}
         </div>
-        <v-btn color="primary" to="/client/booking" prepend-icon="mdi-plus">Book a Ride</v-btn>
+        <v-btn color="primary" to="/client/booking" prepend-icon="mdi-plus">رزرو سفر</v-btn>
       </div>
 
-      <!-- Bookings list -->
+      <!-- لیست رزروها -->
       <v-row v-else>
         <v-col v-for="booking in filteredBookings" :key="booking.id" cols="12" md="6">
           <v-card rounded="xl" class="booking-card" @click="openDetail(booking)">
@@ -52,11 +52,11 @@
                   <div class="text-h6 font-weight-bold text-primary">
                     {{ formatToman(booking.finalFare || booking.estimatedFare) }}
                   </div>
-                  <div class="text-caption text-grey">{{ booking.distanceKm }} km</div>
+                  <div class="text-caption text-grey">{{ booking.distanceKm }} کیلومتر</div>
                 </div>
               </div>
 
-              <!-- Route -->
+              <!-- مسیر -->
               <div class="d-flex align-start gap-3 mb-4">
                 <div class="d-flex flex-column align-center mt-1">
                   <v-icon color="success" size="14">mdi-circle</v-icon>
@@ -83,15 +83,15 @@
                   <v-icon start size="12">mdi-account</v-icon>
                   {{ booking.driver.fullName }}
                 </v-chip>
-                <!-- Cancellation deadline warning on card -->
+                <!-- هشدار مهلت لغو در کارت -->
                 <v-tooltip v-else-if="booking.status === 'pending' && isCancellationBlocked(booking)" location="top">
                   <template #activator="{ props }">
                     <v-chip v-bind="props" size="small" color="warning" variant="tonal">
                       <v-icon start size="12">mdi-clock-alert</v-icon>
-                      Can't cancel
+                      نمی‌توان لغو کرد
                     </v-chip>
                   </template>
-                  Trip is within the {{ cancellationDeadline }}-minute cancellation window
+                  سفر در بازه {{ cancellationDeadline }}-دقیقه‌ای لغو است
                 </v-tooltip>
                 <v-btn
                   v-else-if="booking.status === 'pending'"
@@ -100,7 +100,7 @@
                   variant="tonal"
                   @click.stop="confirmCancel(booking)"
                 >
-                  Cancel
+                  لغو
                 </v-btn>
               </div>
             </div>
@@ -109,26 +109,26 @@
       </v-row>
     </v-container>
 
-    <!-- Booking Detail Drawer -->
+    <!-- پنجره کناری جزئیات رزرو -->
     <v-navigation-drawer v-model="detailDrawer" location="right" width="420" temporary>
       <div v-if="selectedBooking" class="pa-6">
         <div class="d-flex align-center justify-space-between mb-6">
-          <div class="text-h6 font-weight-bold text-secondary">Trip Details</div>
+          <div class="text-h6 font-weight-bold text-secondary">جزئیات سفر</div>
           <v-btn icon="mdi-close" variant="text" @click="detailDrawer = false" />
         </div>
 
-        <!-- Status -->
+        <!-- وضعیت -->
         <v-card :color="statusColor(selectedBooking.status)" variant="tonal" rounded="lg" class="pa-4 mb-4">
           <div class="d-flex align-center gap-3">
             <v-icon :color="statusColor(selectedBooking.status)" size="32">{{ statusIcon(selectedBooking.status) }}</v-icon>
             <div>
               <div class="text-body-2 font-weight-bold">{{ selectedBooking.status.replace('_', ' ').toUpperCase() }}</div>
-              <div class="text-caption">Booking #{{ selectedBooking.id.slice(0, 8).toUpperCase() }}</div>
+              <div class="text-caption">رزرو #{{ selectedBooking.id.slice(0, 8).toUpperCase() }}</div>
             </div>
           </div>
         </v-card>
 
-        <!-- Cancellation deadline warning -->
+        <!-- هشدار مهلت لغو -->
         <v-alert
           v-if="isCancellationBlocked(selectedBooking) && ['pending','confirmed'].includes(selectedBooking.status)"
           type="warning"
@@ -138,16 +138,16 @@
           class="mb-4"
           prepend-icon="mdi-clock-alert"
         >
-          <div class="text-body-2 font-weight-bold mb-1">Cancellation window passed</div>
+          <div class="text-body-2 font-weight-bold mb-1">بازه لغو به پایان رسید</div>
           <div class="text-caption">
-            This trip is within {{ cancellationDeadline }} minutes of its scheduled time and can no longer be cancelled.
-            Please contact support if you need assistance.
+            این سفر در {{ cancellationDeadline }} دقیقه زمان برنامه‌ریزی شده است و دیگر قابل لغو نیست.
+            لطفاً در صورت نیاز با پشتیبانی تماس بگیرید.
           </div>
         </v-alert>
 
-        <!-- Driver info -->
+        <!-- اطلاعات راننده -->
         <v-card v-if="selectedBooking.driver" color="grey-lighten-5" rounded="lg" class="pa-4 mb-4">
-          <div class="text-caption text-grey mb-2 font-weight-bold">YOUR DRIVER</div>
+          <div class="text-caption text-grey mb-2 font-weight-bold">راننده شما</div>
           <div class="d-flex align-center gap-3">
             <v-avatar color="primary" size="48">
               <v-icon color="white">mdi-account</v-icon>
@@ -167,8 +167,8 @@
           </div>
         </v-card>
 
-        <!-- Route -->
-        <div class="text-caption text-grey mb-2 font-weight-bold">TRIP ROUTE</div>
+        <!-- مسیر -->
+        <div class="text-caption text-grey mb-2 font-weight-bold">مسیر سفر</div>
         <v-card color="grey-lighten-5" rounded="lg" class="pa-4 mb-4">
           <div class="d-flex align-start gap-3">
             <div class="d-flex flex-column align-center mt-1">
@@ -183,34 +183,34 @@
           </div>
         </v-card>
 
-        <!-- Details -->
+        <!-- جزئیات -->
         <v-list lines="two">
           <v-list-item prepend-icon="mdi-calendar-clock" density="compact">
-            <template #title><span class="text-caption text-grey">Scheduled</span></template>
+            <template #title><span class="text-caption text-grey">زمان برنامه‌ریزی شده</span></template>
             <template #subtitle>{{ new Date(selectedBooking.scheduledAt).toLocaleString() }}</template>
           </v-list-item>
           <v-list-item prepend-icon="mdi-map-marker-distance" density="compact">
-            <template #title><span class="text-caption text-grey">Distance</span></template>
-            <template #subtitle>{{ selectedBooking.distanceKm }} km</template>
+            <template #title><span class="text-caption text-grey">مسافت</span></template>
+            <template #subtitle>{{ selectedBooking.distanceKm }} کیلومتر</template>
           </v-list-item>
           <v-list-item prepend-icon="mdi-account-group" density="compact">
-            <template #title><span class="text-caption text-grey">Passengers</span></template>
+            <template #title><span class="text-caption text-grey">مسافران</span></template>
             <template #subtitle>{{ selectedBooking.passengerCount || 1 }}</template>
           </v-list-item>
           <v-list-item prepend-icon="mdi-currency-usd" density="compact">
-            <template #title><span class="text-caption text-grey">Fare</span></template>
+            <template #title><span class="text-caption text-grey">کرایه</span></template>
             <template #subtitle>
               <span class="text-primary font-weight-bold">{{ formatToman(selectedBooking.finalFare || selectedBooking.estimatedFare) }}</span>
-              <span v-if="!selectedBooking.finalFare" class="text-grey text-caption"> (estimated)</span>
+              <span v-if="!selectedBooking.finalFare" class="text-grey text-caption"> (تخمینی)</span>
             </template>
           </v-list-item>
           <v-list-item v-if="selectedBooking.notes" prepend-icon="mdi-note-text" density="compact">
-            <template #title><span class="text-caption text-grey">Notes</span></template>
+            <template #title><span class="text-caption text-grey">یادداشت</span></template>
             <template #subtitle>{{ selectedBooking.notes }}</template>
           </v-list-item>
         </v-list>
 
-        <!-- Cancel button — hidden if deadline passed -->
+        <!-- دکمه لغو — در صورت گذشتن مهلت مخفی می‌شود -->
         <v-btn
           v-if="selectedBooking.status === 'pending' && !isCancellationBlocked(selectedBooking)"
           color="error"
@@ -220,10 +220,10 @@
           prepend-icon="mdi-cancel"
           @click="confirmCancel(selectedBooking)"
         >
-          Cancel Booking
+          لغو رزرو
         </v-btn>
 
-        <!-- Deadline passed message -->
+        <!-- پیام گذشتن مهلت -->
         <v-card
           v-else-if="selectedBooking.status === 'pending' && isCancellationBlocked(selectedBooking)"
           color="warning"
@@ -233,22 +233,22 @@
         >
           <div class="d-flex align-center gap-2">
             <v-icon color="warning">mdi-phone</v-icon>
-            <div class="text-body-2">Need to cancel? Contact support directly.</div>
+            <div class="text-body-2">نیاز به لغو دارید؟ مستقیماً با پشتیبانی تماس بگیرید.</div>
           </div>
         </v-card>
       </div>
     </v-navigation-drawer>
 
-    <!-- Cancel Confirm Dialog -->
+    <!-- دیالوگ تأیید لغو -->
     <v-dialog v-model="cancelDialog" max-width="400">
       <v-card rounded="xl" class="pa-6">
         <div class="text-center mb-4">
           <v-icon color="error" size="48" class="mb-3">mdi-alert-circle</v-icon>
-          <div class="text-h6 font-weight-bold text-secondary">Cancel Booking?</div>
-          <div class="text-body-2 text-grey mt-2">This action cannot be undone.</div>
+          <div class="text-h6 font-weight-bold text-secondary">لغو رزرو؟</div>
+          <div class="text-body-2 text-grey mt-2">این اقدام قابل بازگشت نیست.</div>
         </div>
 
-        <!-- Error from server (e.g. deadline passed between open and submit) -->
+        <!-- خطا از سرور (مثلاً مهلت بین باز کردن دیالوگ و ارسال تمام شده) -->
         <v-alert
           v-if="cancelError"
           type="error"
@@ -260,10 +260,10 @@
           prepend-icon="mdi-clock-alert"
         />
 
-        <v-textarea v-model="cancelReason" label="Reason (optional)" rows="2" rounded="lg" variant="outlined" class="mb-4" />
+        <v-textarea v-model="cancelReason" label="دلیل (اختیاری)" rows="2" rounded="lg" variant="outlined" class="mb-4" />
         <div class="d-flex gap-3">
-          <v-btn variant="outlined" color="secondary" block @click="cancelDialog = false">Keep Booking</v-btn>
-          <v-btn color="error" block :loading="cancelling" @click="doCancel">Cancel Ride</v-btn>
+          <v-btn variant="outlined" color="secondary" block @click="cancelDialog = false">نگه‌داشتن رزرو</v-btn>
+          <v-btn color="error" block :loading="cancelling" @click="doCancel">لغو سفر</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -290,7 +290,7 @@ const cancelTarget = ref<any>(null)
 const cancelReason = ref('')
 const cancelling   = ref(false)
 const cancelError  = ref('')
-const cancellationDeadline = ref(60) // minutes — loaded from settings
+const cancellationDeadline = ref(60) // دقیقه — از تنظیمات بارگذاری می‌شود
 
 const loadCancellationDeadline = async () => {
   try {
@@ -300,7 +300,7 @@ const loadCancellationDeadline = async () => {
   } catch {}
 }
 
-// Returns true if the booking is within the cancellation deadline window
+// برمی‌گرداند که آیا رزرو در بازه مهلت لغو است
 const isCancellationBlocked = (booking: any) => {
   if (cancellationDeadline.value <= 0) return false
   const minutesUntilTrip = (new Date(booking.scheduledAt).getTime() - Date.now()) / (1000 * 60)
@@ -308,11 +308,11 @@ const isCancellationBlocked = (booking: any) => {
 }
 
 const tabs = [
-  { label: 'All',       value: 'all',        color: 'secondary' },
-  { label: 'Upcoming',  value: 'pending',    color: 'warning' },
-  { label: 'Confirmed', value: 'confirmed',  color: 'info' },
-  { label: 'Completed', value: 'completed',  color: 'success' },
-  { label: 'Cancelled', value: 'cancelled',  color: 'error' },
+  { label: 'همه',       value: 'all',        color: 'secondary' },
+  { label: 'پیش‌رو',  value: 'pending',    color: 'warning' },
+  { label: 'تأیید شده', value: 'confirmed',  color: 'info' },
+  { label: 'تکمیل شده', value: 'completed',  color: 'success' },
+  { label: 'لغو شده', value: 'cancelled',  color: 'error' },
 ]
 
 const filteredBookings = computed(() => {
@@ -340,7 +340,7 @@ const openDetail = (booking: any) => {
 }
 
 const confirmCancel = (booking: any) => {
-  // Double-check deadline before opening dialog
+  // بررسی مجدد مهلت قبل از باز کردن دیالوگ
   if (isCancellationBlocked(booking)) return
   cancelTarget.value = booking
   cancelReason.value = ''
@@ -356,8 +356,8 @@ const doCancel = async () => {
     cancelDialog.value = false
     detailDrawer.value = false
   } catch (e: any) {
-    // Show the server error message (e.g. deadline passed between opening dialog and submitting)
-    cancelError.value = e.response?.data?.message || 'Cancellation failed. Please try again.'
+    // نمایش پیام خطای سرور (مثلاً مهلت بین باز کردن دیالوگ و ارسال تمام شده)
+    cancelError.value = e.response?.data?.message || 'لغو ناموفق بود. لطفاً دوباره تلاش کنید.'
   } finally {
     cancelling.value = false
   }
