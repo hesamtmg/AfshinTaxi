@@ -1,7 +1,7 @@
 <template>
   <div class="booking-page" style="direction: rtl">
-    <!-- نقشه تمام صفحه -->
-    <div ref="mapRef" class="map-container" />
+    <!-- نقشه نشان (Neshan) -->
+    <div id="neshan-map" class="map-container" />
 
     <!-- نوار جستجو -->
     <div class="map-search pa-3">
@@ -72,7 +72,7 @@
               </v-icon>
             </div>
             <span
-              class="text-caption ml-1"
+              class="text-caption mr-1"
               :class="
                 currentStep >= i + 1
                   ? 'text-primary font-weight-bold'
@@ -121,7 +121,7 @@
               </template>
             </v-text-field>
           </div>
-          <div class="connector-line ml-4 my-1" />
+          <div class="connector-line mr-4 my-1" />
           <div class="d-flex align-center gap-2 mb-3">
             <v-avatar color="error" size="28" rounded="circle">
               <v-icon size="14" color="white">mdi-map-marker</v-icon>
@@ -209,6 +209,10 @@
               <span class="font-weight-bold"
                 >{{ form.distanceKm.toFixed(1) }} کیلومتر</span
               >
+            </div>
+            <div v-if="routeDuration" class="d-flex justify-space-between text-caption mt-1">
+              <span class="text-grey">زمان تخمینی</span>
+              <span class="font-weight-bold">{{ routeDuration }}</span>
             </div>
           </v-card>
 
@@ -343,7 +347,7 @@
         <div class="text-body-2 text-grey mb-6">
           سفر شما رزرو شد. به محض تعیین راننده پیامک دریافت خواهید کرد.
         </div>
-        <v-card color="grey-lighten-5" rounded="lg" class="pa-4 mb-6 text-left">
+        <v-card color="grey-lighten-5" rounded="lg" class="pa-4 mb-6 text-right">
           <div class="d-flex justify-space-between mb-2">
             <span class="text-caption text-grey">شماره رزرو</span>
             <span class="text-caption font-weight-bold text-secondary"
@@ -357,7 +361,7 @@
             >
           </div>
         </v-card>
-        <div class="d-flex gap-3 " style="flex-direction: column;">
+        <div class="d-flex gap-3" style="flex-direction: column;">
           <v-btn variant="outlined" color="secondary" to="/client/trips" block
             >مشاهده سفرهای من</v-btn
           >
@@ -369,226 +373,219 @@
 </template>
 
 <script setup lang="ts">
-import "leaflet/dist/leaflet.css";
-
 definePageMeta({ layout: "client" });
 
 const config = useRuntimeConfig();
 const { $api } = useNuxtApp();
 
-const mapRef = ref<HTMLElement | null>(null);
-let map: any = null;
+// ── متغیرهای نقشه نشان (Neshan) ────────────────────────────────────────────────
+let neshanMap: any = null;
 let pickupMarker: any = null;
 let dropoffMarker: any = null;
-let routePolyline: any = null;
+let routeLayerAdded = false;
 
 const activePin = ref<"pickup" | "dropoff" | null>("pickup");
 const searchQuery = ref("");
 const searchResults = ref<any[]>([]);
 const searchLoading = ref(false);
 const selectedSearchResult = ref("");
+const routeDuration = ref("");
 let searchTimeout: NodeJS.Timeout;
 
 onMounted(() => {
-  loadMap();
+  loadNeshanSDK();
   fetchFare();
 });
 
-const loadMap = async () => {
-  const L = await import("leaflet");
+// ── بارگذاری SDK نقشه نشان ──────────────────────────────────────────────────────
+const loadNeshanSDK = () => {
+  const loadScript = (src: string) =>
+    new Promise<void>((res) => {
+      if (document.querySelector(`script[src="${src}"]`)) {
+        res();
+        return;
+      }
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = () => res();
+      document.head.appendChild(s);
+    });
 
-  if (!mapRef.value) return;
+  const loadLink = (href: string) => {
+    if (document.querySelector(`link[href="${href}"]`)) return;
+    const l = document.createElement("link");
+    l.rel = "stylesheet";
+    l.href = href;
+    document.head.appendChild(l);
+  };
 
-  map = L.map(mapRef.value as HTMLElement, { worldCopyJump: true, renderer: L.canvas() }).setView(
-    [35.6892, 51.389],
-    12
-  );
+  loadLink("https://static.neshan.org/sdk/mapboxgl/v1.13.2/neshan-sdk/v1.1.3/index.css");
 
-  const osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "",
-  }).addTo(map);
+  Promise.all([
+    loadScript("https://static.neshan.org/sdk/mapboxgl/v1.13.2/neshan-sdk/v1.1.3/index.js"),
+    loadScript("https://cdnjs.cloudflare.com/ajax/libs/mapbox-polyline/1.2.1/polyline.js"),
+  ]).then(initMap);
+};
 
-  const trafficLayer = L.tileLayer(
-    `https://api.tomtom.com/traffic/map/4/tile/flow/relative/{z}/{x}/{y}.png?key=${config.public.tomtomApiKey}`,
-    { opacity: 0.8, maxZoom: 22 }
-  );
+// ── مقداردهی اولیه نقشه ─────────────────────────────────────────────────────────
+const initMap = () => {
+  const nmp = (window as any).nmp_mapboxgl;
+  if (!nmp) return;
 
-  trafficLayer.addTo(map);
+  neshanMap = new nmp.Map({
+    mapType: nmp.Map.mapTypes.neshanVector,
+    container: "neshan-map",
+    zoom: 10,
+    center: [51.389, 35.6892], // تهران
+    minZoom: 2,
+    maxZoom: 21,
+    trackResize: true,
+    mapKey: config.public.neshanWebKey,
+    poi: true,
+    traffic: false,
+  });
 
-  L.control
-    .layers(
-      { "OpenStreetMap": osmLayer },
-      { "ترافیک": trafficLayer }
-    )
-    .addTo(map);
-
-  map.on("click", (e: any) => {
-    if (!activePin.value) return;
-    reverseGeocode(e.latlng.lat, e.latlng.lng, activePin.value);
+  neshanMap.on("load", () => {
+    neshanMap.on("click", (e: any) => {
+      if (!activePin.value) return;
+      const lng = e.lngLat.lng;
+      const lat = e.lngLat.lat;
+      reverseGeocode(lat, lng, activePin.value);
+    });
   });
 };
 
+// ── تبدیل مختصات به آدرس با API نشان ────────────────────────────────────────────
 const reverseGeocode = async (
   lat: number,
   lng: number,
   type: "pickup" | "dropoff"
 ) => {
   try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?accept-language=fa&format=json&lat=${lat}&lon=${lng}`
+    const res = await fetch(
+      `https://api.neshan.org/v5/reverse?lat=${lat}&lng=${lng}`,
+      { headers: { "Api-Key": config.public.neshanApiKey } }
     );
-    const result = await response.json();
-    const address =
-      `${result.address?.city || ""} - ${result.address?.neighbourhood || ""} - ${
-        result.address?.road || ""
-      }` || result.display_name ||
-      `${lat}, ${lng}`;
+    const data = await res.json();
+    const address = data.formatted_address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 
     if (type === "pickup") {
       form.value.pickupAddress = address;
       form.value.pickupLat = lat;
       form.value.pickupLng = lng;
-      setPickupMarker(lat, lng);
+      setMarker("pickup", lat, lng);
       activePin.value = form.value.dropoffAddress ? null : "dropoff";
     } else {
       form.value.dropoffAddress = address;
       form.value.dropoffLat = lat;
       form.value.dropoffLng = lng;
-      setDropoffMarker(lat, lng);
+      setMarker("dropoff", lat, lng);
       activePin.value = null;
     }
 
-    if (form.value.pickupLat && form.value.dropoffLat) calculateRoute();
+    if (form.value.pickupLat && form.value.dropoffLat) {
+      await drawRoute();
+    }
   } catch (e) {
     console.error("خطا در تبدیل مختصات به آدرس:", e);
   }
 };
 
-const setPickupMarker = (lat: number, lng: number) => {
-  if (pickupMarker) map.removeLayer(pickupMarker);
+// ── نشانگرهای نقشه ──────────────────────────────────────────────────────────────
+const setMarker = (type: "pickup" | "dropoff", lat: number, lng: number) => {
+  const nmp = (window as any).nmp_mapboxgl;
+  if (!nmp) return;
 
-  const greenIcon = L.divIcon({
-    className: "pickup-marker",
-    html: '<div style="width:24px;height:24px;background:#4CAF50;border:3px solid white;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3)"></div>',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-  });
-
-  pickupMarker = L.marker([lat, lng], { icon: greenIcon }).addTo(map);
-  pickupMarker.bindPopup("نقطه سوار شدن");
-};
-
-const setDropoffMarker = (lat: number, lng: number) => {
-  if (dropoffMarker) map.removeLayer(dropoffMarker);
-
-  const redIcon = L.divIcon({
-    className: "dropoff-marker",
-    html: '<div style="width:20px;height:28px;background:#F44336;border-radius:10px 10px 0 0;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);position:relative"><div style="width:8px;height:8px;background:white;border-radius:50%;position:absolute;top:6px;left:6px"></div></div>',
-    iconSize: [20, 28],
-    iconAnchor: [10, 28],
-  });
-
-  dropoffMarker = L.marker([lat, lng], { icon: redIcon }).addTo(map);
-  dropoffMarker.bindPopup("نقطه پیاده شدن");
-};
-
-const calculateRoute = async () => {
-  try {
-    if (routePolyline) map.removeLayer(routePolyline);
-
-    const url = `https://router.project-osrm.org/route/v1/driving/${form.value.pickupLng},${form.value.pickupLat};${form.value.dropoffLng},${form.value.dropoffLat}?overview=full&geometries=geojson`;
-
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.routes && data.routes.length > 0) {
-      const route = data.routes[0];
-      const distance = route.distance / 1000;
-      form.value.distanceKm = parseFloat(distance.toFixed(2));
-
-      const coordinates = route.geometry.coordinates;
-      const latlngs = coordinates.map((coord: number[]) => [
-        coord[1],
-        coord[0],
-      ]);
-
-      routePolyline = L.polyline(latlngs, {
-        color: "blue",
-        weight: 4,
-        opacity: 0.9,
-        dashArray: "0",
-      }).addTo(map);
-
-      fitBounds();
-    }
-  } catch (e) {
-    console.error("خطا در محاسبه مسیر:", e);
+  if (type === "pickup") {
+    if (pickupMarker) pickupMarker.remove();
+    pickupMarker = new nmp.Marker({ color: "#4CAF50" })
+      .setLngLat([lng, lat])
+      .addTo(neshanMap);
+  } else {
+    if (dropoffMarker) dropoffMarker.remove();
+    dropoffMarker = new nmp.Marker({ color: "#F44336" })
+      .setLngLat([lng, lat])
+      .addTo(neshanMap);
   }
 };
 
-const fitBounds = () => {
-  if (!form.value.pickupLat || !form.value.dropoffLat || !map) return;
-
-  const bounds = L.latLngBounds(
-    [form.value.pickupLat, form.value.pickupLng],
-    [form.value.dropoffLat, form.value.dropoffLng]
-  );
-
-  map.fitBounds(bounds, { padding: [60, 60] });
-};
-
-const setActivePin = (type: "pickup" | "dropoff") => {
-  activePin.value = type;
-};
-
-const currentStep = ref(1);
-const submitting = ref(false);
-const successDialog = ref(false);
-const createdBookingId = ref<string | null>(null);
-const farePerKm = ref(14000);
-
-const form = ref({
-  pickupAddress: "",
-  pickupLat: 0,
-  pickupLng: 0,
-  dropoffAddress: "",
-  dropoffLat: 0,
-  dropoffLng: 0,
-  distanceKm: 0,
-  scheduledAt: "",
-  passengerCount: 1,
-  notes: "",
-});
-
-const steps = [
-  { label: "مکان‌ها", icon: "mdi-map-marker" },
-  { label: "جزئیات", icon: "mdi-calendar" },
-  { label: "تأیید", icon: "mdi-check" },
-];
-
-const minDateTime = computed(() =>
-  new Date(Date.now() + 30 * 60000).toISOString().slice(0, 16)
-);
-
-const estimatedFare = computed(() =>
-  parseFloat(((form.value.distanceKm || 0) * farePerKm.value).toFixed(2))
-);
-
-const bookingSummary = computed(() => [
-  { label: "سوار شدن", icon: "mdi-circle-outline", value: form.value.pickupAddress },
-  { label: "پیاده شدن", icon: "mdi-map-marker", value: form.value.dropoffAddress },
-  { label: "تاریخ و زمان", icon: "mdi-calendar-clock", value: form.value.scheduledAt ? new Date(form.value.scheduledAt).toLocaleString("fa-IR") : "" },
-  { label: "مسافران", icon: "mdi-account-group", value: `${form.value.passengerCount} نفر` },
-]);
-
-const fetchFare = async () => {
+// ── رسم مسیر با API نشان ────────────────────────────────────────────────────────
+const drawRoute = async () => {
   try {
-    const { data } = await $api.get("/settings");
-    const s = data.find((s: any) => s.key === "fare_per_km");
-    if (s) farePerKm.value = parseFloat(s.value);
-  } catch {}
+    const origin = `${form.value.pickupLat},${form.value.pickupLng}`;
+    const destination = `${form.value.dropoffLat},${form.value.dropoffLng}`;
+
+    const res = await fetch(
+      `https://api.neshan.org/v4/direction?type=car&origin=${origin}&destination=${destination}&alternative=false`,
+      { headers: { "Api-Key": config.public.neshanApiKey } }
+    );
+    const data = await res.json();
+
+    if (!data.routes?.length) return;
+
+    const route = data.routes[0];
+    const leg = route.legs[0];
+
+    // مسافت و زمان
+    form.value.distanceKm = leg.distance.value / 1000;
+    routeDuration.value = leg.duration.text;
+
+    // رمزگشایی polyline
+    const polylineLib = (window as any).polyline;
+    const routes: number[][][] = [];
+
+    leg.steps.forEach((step: any) => {
+      const decoded = polylineLib.decode(step.polyline, 5);
+      decoded.forEach((pt: number[]) => pt.reverse()); // [lat,lng] → [lng,lat]
+      routes.push(decoded);
+    });
+
+    const geojson = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: { type: "MultiLineString", coordinates: routes },
+        },
+      ],
+    };
+
+    // حذف مسیر قبلی
+    if (routeLayerAdded) {
+      if (neshanMap.getLayer("neshan-route-line"))
+        neshanMap.removeLayer("neshan-route-line");
+      if (neshanMap.getSource("neshan-route"))
+        neshanMap.removeSource("neshan-route");
+    }
+
+    neshanMap.addSource("neshan-route", { type: "geojson", data: geojson });
+    neshanMap.addLayer({
+      id: "neshan-route-line",
+      type: "line",
+      source: "neshan-route",
+      layout: { "line-join": "round", "line-cap": "round" },
+      paint: { "line-color": "blue", "line-width": 5, "line-opacity": 0.9 },
+    });
+    routeLayerAdded = true;
+
+    fitBounds();
+  } catch (e) {
+    console.error("خطا در رسم مسیر:", e);
+  }
 };
 
+// ── تنظیم نمای نقشه بر روی مسیر ──────────────────────────────────────────────────
+const fitBounds = () => {
+  if (!form.value.pickupLat || !form.value.dropoffLat || !neshanMap) return;
+  const nmp = (window as any).nmp_mapboxgl;
+  const bounds = new nmp.LngLatBounds(
+    [form.value.pickupLng, form.value.pickupLat],
+    [form.value.dropoffLng, form.value.dropoffLat]
+  );
+  neshanMap.fitBounds(bounds, { padding: 80 });
+};
+
+// ── جستجوی مکان با Nominatim ───────────────────────────────────────────────────
 const handleSearch = async (query: string) => {
   if (!query || query.length < 2) {
     searchResults.value = [];
@@ -631,18 +628,92 @@ const selectSearchResult = async (result: string) => {
   selectedSearchResult.value = "";
   searchResults.value = [];
 
-  if (map) {
-    map.setView([lat, lng], 16);
+  if (neshanMap) {
+    neshanMap.setCenter([lng, lat]);
+    neshanMap.setZoom(16);
   }
+};
+
+// ── وضعیت فرم ───────────────────────────────────────────────────────────────────
+const setActivePin = (type: "pickup" | "dropoff") => {
+  activePin.value = type;
+};
+
+const currentStep = ref(1);
+const submitting = ref(false);
+const successDialog = ref(false);
+const createdBookingId = ref<string | null>(null);
+const farePerKm = ref(14000);
+
+const form = ref({
+  pickupAddress: "",
+  pickupLat: 0,
+  pickupLng: 0,
+  dropoffAddress: "",
+  dropoffLat: 0,
+  dropoffLng: 0,
+  distanceKm: 0,
+  scheduledAt: "",
+  passengerCount: 1,
+  notes: "",
+});
+
+const steps = [
+  { label: "مکان‌ها", icon: "mdi-map-marker" },
+  { label: "جزئیات", icon: "mdi-calendar" },
+  { label: "تأیید", icon: "mdi-check" },
+];
+
+const minDateTime = computed(() =>
+  new Date(Date.now() + 30 * 60000).toISOString().slice(0, 16)
+);
+
+const estimatedFare = computed(() =>
+  parseFloat(((form.value.distanceKm || 0) * farePerKm.value).toFixed(2))
+);
+
+const bookingSummary = computed(() => [
+  { label: "سوار شدن", icon: "mdi-circle-outline", value: form.value.pickupAddress },
+  { label: "پیاده شدن", icon: "mdi-map-marker", value: form.value.dropoffAddress },
+  {
+    label: "تاریخ و زمان",
+    icon: "mdi-calendar-clock",
+    value: form.value.scheduledAt
+      ? new Date(form.value.scheduledAt).toLocaleString("fa-IR")
+      : "",
+  },
+  { label: "مسافران", icon: "mdi-account-group", value: `${form.value.passengerCount} نفر` },
+]);
+
+const fetchFare = async () => {
+  try {
+    const { data } = await $api.get("/settings");
+    const s = data.find((s: any) => s.key === "fare_per_km");
+    if (s) farePerKm.value = parseFloat(s.value);
+  } catch {}
+};
+
+const clearRoute = () => {
+  if (routeLayerAdded && neshanMap) {
+    if (neshanMap.getLayer("neshan-route-line"))
+      neshanMap.removeLayer("neshan-route-line");
+    if (neshanMap.getSource("neshan-route"))
+      neshanMap.removeSource("neshan-route");
+    routeLayerAdded = false;
+  }
+  form.value.distanceKm = 0;
+  routeDuration.value = "";
 };
 
 const clearPickup = () => {
   form.value.pickupAddress = "";
   form.value.pickupLat = 0;
   form.value.pickupLng = 0;
-  if (pickupMarker) map.removeLayer(pickupMarker);
-  if (routePolyline) map.removeLayer(routePolyline);
-  form.value.distanceKm = 0;
+  if (pickupMarker) {
+    pickupMarker.remove();
+    pickupMarker = null;
+  }
+  clearRoute();
   activePin.value = "pickup";
 };
 
@@ -650,9 +721,11 @@ const clearDropoff = () => {
   form.value.dropoffAddress = "";
   form.value.dropoffLat = 0;
   form.value.dropoffLng = 0;
-  if (dropoffMarker) map.removeLayer(dropoffMarker);
-  if (routePolyline) map.removeLayer(routePolyline);
-  form.value.distanceKm = 0;
+  if (dropoffMarker) {
+    dropoffMarker.remove();
+    dropoffMarker = null;
+  }
+  clearRoute();
   activePin.value = "dropoff";
 };
 
@@ -687,9 +760,15 @@ const resetForm = () => {
     passengerCount: 1,
     notes: "",
   };
-  if (pickupMarker) map.removeLayer(pickupMarker);
-  if (dropoffMarker) map.removeLayer(dropoffMarker);
-  if (routePolyline) map.removeLayer(routePolyline);
+  if (pickupMarker) {
+    pickupMarker.remove();
+    pickupMarker = null;
+  }
+  if (dropoffMarker) {
+    dropoffMarker.remove();
+    dropoffMarker = null;
+  }
+  clearRoute();
   activePin.value = "pickup";
 };
 </script>
@@ -717,11 +796,21 @@ const resetForm = () => {
   z-index: 1;
 }
 
+#neshan-map {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
 .map-search {
   position: absolute;
   top: 12px;
-  left: 60px;
-  right: auto;
+  right: 60px;
   width: 320px;
   z-index: 50;
   background: white;
@@ -733,9 +822,7 @@ const resetForm = () => {
   position: absolute;
   top: 0;
   width: 30%;
-  left: 0;
-  right: 100px;
-
+  right: 0;
   z-index: 40;
   display: flex;
   align-items: center;
@@ -748,8 +835,8 @@ const resetForm = () => {
 .form-container {
   position: absolute;
   bottom: 102px;
-  right: 12px;
-  left: auto;
+  left: 12px;
+  right: auto;
   z-index: 30;
   max-height: calc(100vh - 100px);
 }
@@ -819,8 +906,8 @@ const resetForm = () => {
   }
 
   .form-container {
-    right: 0;
     left: 0;
+    right: 0;
     bottom: 0;
   }
 

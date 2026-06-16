@@ -3,10 +3,7 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: true,
-  public:
-  {
-    tomtomApiKey: process.env.NUXT_PUBLIC_TOMTOM_API_KEY,
-  },
+
   build: {
     transpile: ['vuetify', 'form-data'],
   },
@@ -38,6 +35,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3000/api',
+
+      neshanWebKey: process.env.NUXT_PUBLIC_NESHAN_WEB_KEY || '',  // Map display key
+      neshanApiKey: process.env.NUXT_PUBLIC_NESHAN_API_KEY || '',  // Routing + reverse geocode key
     },
   },
 
