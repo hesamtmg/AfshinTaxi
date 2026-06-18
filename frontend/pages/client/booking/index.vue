@@ -23,8 +23,8 @@
         <template #item="{ props: itemProps, item }">
           <v-list-item
             v-bind="itemProps"
-            :title="item.raw.display_name?.slice(0, 50)"
-            :subtitle="`${item.raw.lat}, ${item.raw.lon}`"
+            :title="item.raw.display_name"
+            :subtitle="item.raw.raw?.address?.city || ''"
           >
             <template #prepend>
               <v-icon size="18" color="primary">mdi-map-marker</v-icon>
@@ -357,7 +357,7 @@
           <div class="d-flex justify-space-between">
             <span class="text-caption text-grey">کرایه تخمینی</span>
             <span class="text-caption font-weight-bold text-primary"
-              >تومان{{ estimatedFare.toFixed(2) }}</span
+              >{{ formatToman(estimatedFare) }}</span
             >
           </div>
         </v-card>
@@ -587,6 +587,7 @@ const fitBounds = () => {
 };
 
 // ── جستجوی مکان با Nominatim ───────────────────────────────────────────────────
+// ── جستجوی مکان با API نشان ─────────────────────────────────────────────────────
 const handleSearch = async (query: string) => {
   if (!query || query.length < 2) {
     searchResults.value = [];
@@ -599,10 +600,17 @@ const handleSearch = async (query: string) => {
   searchTimeout = setTimeout(async () => {
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?accept-language=fa&format=json&q=${encodeURIComponent(query)}&viewbox=50.5,35.0,52.5,36.0&bounded=1`
+        `https://api.neshan.org/v1/search?term=${encodeURIComponent(query)}&lat=35.6892&lng=51.389`,
+        { headers: { 'Api-Key': config.public.neshanApiKey } }
       );
-      const results = await response.json();
-      searchResults.value = results.slice(0, 5);
+      const data = await response.json();
+      // Map Neshan search results to a common shape
+      searchResults.value = (data.items || []).slice(0, 6).map((item: any) => ({
+        display_name: item.title + (item.address?.city ? '، ' + item.address.city : '') + (item.address?.district ? '، ' + item.address.district : ''),
+        lat: item.location?.y,
+        lon: item.location?.x,
+        raw: item,
+      }));
     } catch (e) {
       console.error("خطا در جستجو:", e);
       searchResults.value = [];

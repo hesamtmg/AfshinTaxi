@@ -7,6 +7,8 @@ interface User {
   email?: string
   role: 'client' | 'admin'
   isVerified: boolean
+  isActive: boolean
+  createdAt?: string
 }
 
 interface AuthState {
@@ -24,14 +26,14 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.token && !!state.user,
-    isAdmin: (state) => state.user?.role === 'admin',
+    isAdmin:  (state) => state.user?.role === 'admin',
     isClient: (state) => state.user?.role === 'client',
   },
 
   actions: {
     setAuth(token: string, user: User) {
       this.token = token
-      this.user = user
+      this.user  = user
       if (process.client) {
         localStorage.setItem('auth_token', token)
         localStorage.setItem('auth_user', JSON.stringify(user))
@@ -43,8 +45,8 @@ export const useAuthStore = defineStore('auth', {
     },
 
     logout() {
-      this.token = null
-      this.user = null
+      this.token        = null
+      this.user         = null
       this.pendingPhone = null
       if (process.client) {
         localStorage.removeItem('auth_token')
@@ -55,10 +57,10 @@ export const useAuthStore = defineStore('auth', {
     hydrate() {
       if (process.client) {
         const token = localStorage.getItem('auth_token')
-        const user = localStorage.getItem('auth_user')
+        const user  = localStorage.getItem('auth_user')
         if (token && user) {
           this.token = token
-          this.user = JSON.parse(user)
+          this.user  = JSON.parse(user)
         }
       }
     },

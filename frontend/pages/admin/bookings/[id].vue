@@ -238,39 +238,120 @@
     </v-row>
 
     <!-- دیالوگ اختصاص راننده -->
-    <v-dialog v-model="assignDialog" max-width="480">
+   <v-dialog v-model="assignDialog" max-width="520">
       <v-card rounded="xl" class="pa-6">
-        <div class="text-h6 font-weight-bold text-secondary mb-1">{{ booking?.driver ? 'تغییر راننده' : 'اختصاص راننده' }}</div>
-        <div class="text-body-2 text-grey mb-5">رزرو #{{ booking?.id?.slice(0, 8).toUpperCase() }}</div>
-        <v-text-field v-model="driverSearch" placeholder="جستجوی رانندگان..." prepend-inner-icon="mdi-magnify" variant="outlined" rounded="lg" hide-details density="compact" class="mb-3" />
-        <div style="max-height:280px;overflow-y:auto" class="mb-4">
-          <v-radio-group v-model="selectedDriverId" hide-details>
-            <v-card
-              v-for="driver in filteredDrivers"
-              :key="driver.id"
-              class="mb-2 pa-3 cursor-pointer"
-              rounded="lg"
-              :style="selectedDriverId === driver.id ? 'border:2px solid #F5A623' : 'border:2px solid transparent'"
-              @click="selectedDriverId = driver.id"
-            >
-              <div class="d-flex align-center gap-3">
-                <v-radio :value="driver.id" hide-details />
-                <v-avatar color="info" size="40"><v-icon color="white" size="20">mdi-account-tie</v-icon></v-avatar>
-                <div class="flex-1">
-                  <div class="text-body-2 font-weight-bold text-secondary">{{ driver.fullName }}</div>
-                  <div class="text-caption text-grey">{{ driver.carModel }} · {{ driver.carPlate }}</div>
-                </div>
-                <v-chip size="x-small" color="success">فعال</v-chip>
-              </div>
-            </v-card>
-            <div v-if="filteredDrivers.length === 0" class="text-center pa-6 text-grey text-body-2">هیچ راننده فعالی یافت نشد</div>
-          </v-radio-group>
+        <div class="text-h6 font-weight-bold text-secondary mb-1">اختصاص راننده</div>
+        <div class="text-body-2 text-grey mb-4">رزرو #{{ assignTarget?.id?.slice(0,8).toUpperCase() }}</div>
+
+        <!-- نشانگر بازه زمانی -->
+        <v-alert
+          v-if="assignTarget"
+          type="info"
+          variant="tonal"
+          rounded="lg"
+          density="compact"
+          class="mb-4"
+          prepend-icon="mdi-calendar-clock"
+        >
+          نمایش رانندگان آزاد برای
+          <strong>{{ new Date(assignTarget.scheduledAt).toLocaleString() }}</strong>
+          <span class="text-caption ml-1">(±{{ bufferMinutes }}دقیقه بافر)</span>
+        </v-alert>
+
+        <!-- در حال بارگذاری -->
+        <div v-if="loadingAvailable" class="d-flex flex-column align-center pa-8 gap-3">
+          <v-progress-circular indeterminate color="primary" />
+          <span class="text-caption text-grey">بررسی در دسترس بودن رانندگان...</span>
         </div>
-        <div class="d-flex gap-3">
-          <v-btn variant="outlined" color="secondary" block @click="assignDialog = false">لغو</v-btn>
-          <v-btn color="primary" block :loading="assigning" :disabled="!selectedDriverId" @click="doAssign">
-            {{ booking?.driver ? 'تغییر' : 'اختصاص' }}
-          </v-btn>
+
+        <div v-else>
+          <!-- هیچ راننده‌ای موجود نیست -->
+          <v-alert
+            v-if="availableDrivers.length === 0"
+            type="error"
+            variant="tonal"
+            rounded="xl"
+            class="mb-4"
+            prepend-icon="mdi-account-off"
+          >
+            <div class="font-weight-bold mb-1">هیچ راننده‌ای در دسترس نیست</div>
+            همه رانندگان فعال در بازه ±{{ bufferMinutes }} دقیقه از این سفر رزرو تداخلی دارند.
+            پنجره بافر را در تنظیمات تنظیم کنید یا زمان رزرو را تغییر دهید.
+          </v-alert>
+
+          <div v-else>
+            <div class="d-flex align-center justify-space-between mb-3">
+              <v-chip size="small" color="success" variant="tonal">
+                <v-icon start size="14">mdi-check-circle</v-icon>
+                {{ availableDrivers.length }} راننده در دسترس
+              </v-chip>
+              <v-text-field
+                v-model="driverSearch"
+                placeholder="جستجو..."
+                prepend-inner-icon="mdi-magnify"
+                variant="outlined"
+                rounded="lg"
+                hide-details
+                density="compact"
+                style="max-width:180px"
+              />
+            </div>
+
+            <div style="max-height:280px;overflow-y:auto" class="mb-4">
+              <v-radio-group v-model="selectedDriverId" hide-details>
+                <v-card
+                  v-for="driver in filteredAvailableDrivers"
+                  :key="driver.id"
+                  class="mb-2 pa-3 cursor-pointer"
+                  rounded="lg"
+                  :style="selectedDriverId === driver.id ? 'border:2px solid #F5A623' : 'border:2px solid transparent'"
+                  @click="selectedDriverId = driver.id"
+                >
+                  <div class="d-flex align-center gap-3">
+                    <v-radio :value="driver.id" hide-details />
+                    <v-avatar color="info" size="40">
+                      <v-icon color="white" size="20">mdi-account-tie</v-icon>
+                    </v-avatar>
+                    <div class="flex-1">
+                      <div class="text-body-2 font-weight-bold text-secondary">{{ driver.fullName }}</div>
+                      <div class="text-caption text-grey">{{ driver.carModel }} · {{ driver.carPlate }}</div>
+                    </div>
+                    <v-chip size="x-small" color="success">
+                      <v-icon start size="10">mdi-check</v-icon>آزاد
+                    </v-chip>
+                  </div>
+                </v-card>
+                <div v-if="filteredAvailableDrivers.length === 0" class="text-center pa-4 text-grey text-body-2">
+                  هیچ راننده‌ای با جستجوی شما مطابقت ندارد
+                </div>
+              </v-radio-group>
+            </div>
+          </div>
+
+          <v-text-field
+            v-model="finalFareInput"
+            label="کرایه نهایی (تومان، اختیاری)"
+            prepend-inner-icon="mdi-cash"
+            type="number"
+            variant="outlined"
+            rounded="lg"
+            hide-details
+            density="compact"
+            class="mb-5"
+          />
+
+          <div class="d-flex gap-3">
+            <v-btn variant="outlined" color="secondary" block @click="assignDialog = false">لغو</v-btn>
+            <v-btn
+              color="primary"
+              block
+              :loading="assigning"
+              :disabled="!selectedDriverId || availableDrivers.length === 0"
+              @click="doAssign"
+            >
+              اختصاص راننده
+            </v-btn>
+          </div>
         </div>
       </v-card>
     </v-dialog>
@@ -285,6 +366,17 @@ const route  = useRoute()
 const { $api } = useNuxtApp()
 const config   = useRuntimeConfig()
 
+
+const loadSettings = async () => {
+  try {
+    const { data } = await $api.get('/settings')
+    const buf = data.find((s: any) => s.key === 'driver_buffer_minutes')
+    const can = data.find((s: any) => s.key === 'cancellation_deadline_minutes')
+    if (buf) bufferMinutes.value = parseInt(buf.value)
+    if (can) cancellationDeadlineMinutes.value = parseInt(can.value)
+  } catch {}
+}
+
 const booking        = ref<any>(null)
 const loading        = ref(true)
 const drivers        = ref<any[]>([])
@@ -296,14 +388,21 @@ const updatingStatus = ref('')
 const editingFare    = ref(false)
 const newFare        = ref('')
 const savingFare     = ref(false)
-
+const assignTarget      = ref<any>(null)
+const finalFareInput    = ref('')
+const availableDrivers  = ref<any[]>([])
+const loadingAvailable  = ref(false)
 let neshanMap: any    = null
 let routeLayerAdded   = false
+const bufferMinutes     = ref(5)
+const cancellationDeadlineMinutes = ref(5)
+
 
 onMounted(async () => {
   await fetchBooking()
   await loadDrivers()
   loadNeshanSDK()
+  loadSettings()
 })
 
 async function fetchBooking() {
@@ -318,14 +417,14 @@ async function loadDrivers() {
   try { const { data } = await $api.get('/drivers?status=active'); drivers.value = data } catch {}
 }
 
-const filteredDrivers = computed(() =>
-  drivers.value.filter((d) =>
+// 
+const filteredAvailableDrivers = computed(() =>
+  availableDrivers.value.filter((d) =>
     !driverSearch.value ||
     d.fullName.toLowerCase().includes(driverSearch.value.toLowerCase()) ||
     d.carPlate.toLowerCase().includes(driverSearch.value.toLowerCase()),
   ),
 )
-
 // ── نقشه نشان ────────────────────────────────────────────────────────────────
 const loadNeshanSDK = () => {
   const loadLink = (href: string) => {
@@ -484,7 +583,25 @@ const openReassign = () => {
   selectedDriverId.value = booking.value.driverId || ''
   driverSearch.value = ''; assignDialog.value = true
 }
-
+const openAssign = async (booking: any) => {
+  assignTarget.value     = booking
+  selectedDriverId.value = ''
+  finalFareInput.value   = ''
+  driverSearch.value     = ''
+  availableDrivers.value = []
+  assignDialog.value     = true
+  loadingAvailable.value = true
+  try {
+    const { data } = await $api.get('/bookings/available-drivers', {
+      params: { scheduledAt: booking.scheduledAt },
+    })
+    availableDrivers.value = data
+  } catch {
+    availableDrivers.value = []
+  } finally {
+    loadingAvailable.value = false
+  }
+}
 const doAssign = async () => {
   assigning.value = true
   try {
