@@ -8,6 +8,7 @@ import { Driver, DriverStatus } from '../database/entities/driver.entity';
 import { SettingsService } from '../settings/settings.service';
 import { SmsService } from '../sms/sms.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { EditBookingDto } from './dto/edit-booking.dto';
 import { AssignDriverDto } from './dto/assign-driver.dto';
 
 @Injectable()
@@ -154,6 +155,7 @@ export class BookingsService {
         driver.carModel,
         driver.carPlate,
         booking.scheduledAt,
+        saved.finalFare || saved.estimatedFare,
       );
     } catch (e) {
       // Don't fail the whole request if SMS fails
@@ -224,7 +226,7 @@ export class BookingsService {
     if (busyDriverIds.length > 0) {
       qb.andWhere('driver.id NOT IN (:...busyDriverIds)', { busyDriverIds });
     }
-    console.log('driverRepo',qb)
+
     return qb.orderBy('driver.fullName', 'ASC').getMany();
   }
 
@@ -254,4 +256,41 @@ export class BookingsService {
       totalRevenue: parseFloat(revenueResult?.total || '0'),
     };
   }
+
+  // ─── Client: Edit pending booking (no driver assigned yet) ──────────────────
+  async edit(id: string, userId: string, dto: EditBookingDto): Promise<Booking> {
+    const booking = await this.findOne(id, userId);
+
+    if (booking.status !== BookingStatus.PENDING) {
+      throw new BadRequestException(
+        'فقط رزروهای در انتظار (بدون راننده) قابل ویرایش هستند',
+      );
+    }
+
+    if (booking.driverId) {
+      throw new BadRequestException(
+        'رزرو پس از تخصیص راننده قابل ویرایش نیست',
+      );
+    }
+
+    if (dto.scheduledAt) {
+      const minAdvanceMinutes = parseInt(
+        (await this.settingsService.get('min_advance_minutes')) || '30',
+      );
+      const minutesUntilTrip =
+        (new Date(dto.scheduledAt).getTime() - Date.now()) / (1000 * 60);
+      if (minutesUntilTrip < minAdvanceMinutes) {
+        throw new BadRequestException(
+          `زمان سفر باید حداقل ${minAdvanceMinutes} دقیقه دیگر باشد`,
+        );
+      }
+      booking.scheduledAt = new Date(dto.scheduledAt);
+    }
+
+    if (dto.passengerCount !== undefined) booking.passengerCount = dto.passengerCount;
+    if (dto.notes          !== undefined) booking.notes          = dto.notes;
+
+    return this.bookingRepo.save(booking);
+  }
+
 }

@@ -6,10 +6,9 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../database/entities/user.entity';
 
 @Controller('settings')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+
 export class SettingsController {
-  constructor(private readonly settingsService: SettingsService) {}
+  constructor(private readonly settingsService: SettingsService) { }
 
   @Get()
   getAll() {
@@ -17,6 +16,8 @@ export class SettingsController {
   }
 
   @Put()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   set(@Body() body: { key: string; value: string; description?: string }) {
     return this.settingsService.set(body.key, body.value, body.description);
   }

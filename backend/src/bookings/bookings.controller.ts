@@ -9,6 +9,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole, User } from '../database/entities/user.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { EditBookingDto } from './dto/edit-booking.dto';
 import { AssignDriverDto } from './dto/assign-driver.dto';
 import { BookingStatus } from './entities/booking.entity';
 
@@ -34,6 +35,16 @@ export class BookingsController {
   @Roles(UserRole.CLIENT)
   getMyBooking(@CurrentUser() user: User, @Param('id') id: string) {
     return this.bookingsService.findOne(id, user.id);
+  }
+
+  @Patch('my/:id/edit')
+  @Roles(UserRole.CLIENT)
+  editBooking(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+    @Body() dto: EditBookingDto,
+  ) {
+    return this.bookingsService.edit(id, user.id, dto);
   }
 
   @Patch('my/:id/cancel')

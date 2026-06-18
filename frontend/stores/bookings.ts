@@ -36,11 +36,11 @@ export interface Booking {
 
 export const useBookingsStore = defineStore('bookings', {
   state: () => ({
-    myBookings:   [] as Booking[],
-    allBookings:  [] as Booking[],
+    myBookings: [] as Booking[],
+    allBookings: [] as Booking[],
     currentBooking: null as Booking | null,
     loading: false,
-    stats:   null as any,
+    stats: null as any,
   }),
 
   actions: {
@@ -88,6 +88,13 @@ export const useBookingsStore = defineStore('bookings', {
     async cancelBooking(bookingId: string, reason?: string) {
       const { $api } = useNuxtApp()
       const { data } = await $api.patch(`/bookings/my/${bookingId}/cancel`, { reason })
+      const idx = this.myBookings.findIndex((b) => b.id === bookingId)
+      if (idx !== -1) this.myBookings[idx] = data
+      return data
+    },
+    async editBooking(bookingId: string, payload: { scheduledAt?: string; passengerCount?: number; notes?: string }) {
+      const { $api } = useNuxtApp()
+      const { data } = await $api.patch(`/bookings/my/${bookingId}/edit`, payload)
       const idx = this.myBookings.findIndex((b) => b.id === bookingId)
       if (idx !== -1) this.myBookings[idx] = data
       return data
