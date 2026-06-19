@@ -34,9 +34,9 @@
       </v-autocomplete>
     </div>
 
-    <!-- راهنمای نقشه -->
+    <!-- راهنمای نقشه — مخفی وقتی sheet باز است -->
     <div
-      v-if="activePin"
+      v-if="activePin && !sheetExpanded"
       class="map-hint pa-3 d-flex align-center gap-2"
       :style="{ background: activePin === 'pickup' ? '#4CAF50' : '#F44336' }"
     >
@@ -44,7 +44,7 @@
       <span class="text-white text-body-2 font-weight-medium">
         برای تعیین نقطه
         <strong>{{ activePin === 'pickup' ? 'سوار شدن' : 'پیاده شدن' }}</strong>
-        روی نقشه کلیک کنید یا جستجو کنید
+        روی نقشه لمس کنید یا جستجو کنید
       </span>
     </div>
 
@@ -285,7 +285,7 @@
           </div>
           <v-btn
             color="primary" block :disabled="!form.pickupAddress || !form.dropoffAddress"
-            @click="currentStep = 2"
+            @click="currentStep = 2; sheetExpanded = true"
           >
             ادامه <v-icon end size="18">mdi-arrow-left</v-icon>
           </v-btn>
@@ -713,7 +713,7 @@ const resetForm = () => {
 
 .booking-page {
   width: 100%;
-  height: 100vh;
+  height: 100dvh; /* dynamic viewport height — handles mobile browser bars */
   position: relative;
   overflow: hidden;
 }
@@ -728,19 +728,19 @@ const resetForm = () => {
   z-index: 1;
 }
 
-/* جستجو */
+/* جستجو — دسکتاپ */
 .map-search {
   position: absolute;
-  top: 12px;
+  top: 14px;
   right: 60px;
-  width: 320px;
+  width: 300px;
   z-index: 50;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
 }
 
-/* راهنما */
+/* راهنما — دسکتاپ: بالای صفحه سمت راست */
 .map-hint {
   position: absolute;
   top: 0;
@@ -780,22 +780,16 @@ const resetForm = () => {
 .form-card-desktop::-webkit-scrollbar { width: 5px; }
 .form-card-desktop::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
-/* ══════════════ موبایل Bottom Sheet ══════════════ */
-.bottom-sheet {
-  display: none; /* پیش‌فرض: مخفی — فقط موبایل نشان می‌دهیم */
-}
+/* ══════════════ مشترک ══════════════ */
+.bottom-sheet { display: none; }
 
-/* step dot */
 .step-dot {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
+  width: 24px; height: 24px; min-width: 24px;
   transition: background 0.2s;
 }
 
 .connector-line {
-  width: 2px;
-  height: 24px;
+  width: 2px; height: 24px;
   background: #e0e0e0;
   margin-right: 11px;
 }
@@ -808,30 +802,32 @@ const resetForm = () => {
 /* ══════════════ موبایل ══════════════ */
 @media (max-width: 600px) {
 
-  /* جستجو */
+  /* جستجو — موبایل: بالا با فاصله از لبه‌ها */
   .map-search {
     top: 10px;
     right: 10px;
     left: 10px;
     width: auto;
+    /* کمی پایین‌تر از بالا تا با نوار مرورگر تداخل نداشته باشد */
   }
 
-  /* راهنما */
+  /* راهنما — موبایل: بالای sheet */
   .map-hint {
-    width: 100%;
+    position: absolute;
+    bottom: 70px; /* بالای collapsed sheet */
     top: auto;
-    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
     border-radius: 0;
     z-index: 45;
   }
 
-  /* legend مخفی */
+  /* legend و فرم دسکتاپ مخفی */
   .map-legend { display: none; }
-
-  /* فرم دسکتاپ مخفی */
   .form-container-desktop { display: none; }
 
-  /* bottom sheet */
+  /* ── Bottom Sheet ── */
   .bottom-sheet {
     display: flex;
     flex-direction: column;
@@ -842,39 +838,54 @@ const resetForm = () => {
     z-index: 40;
     background: white;
     border-radius: 20px 20px 0 0;
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
-    /* بسته: فقط دستگیره + preview */
-    max-height: 120px;
-    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 -6px 32px rgba(0,0,0,0.2);
+
+    /* collapsed: فقط handle + preview — ارتفاع ثابت */
+    height: 72px;
+    max-height: 72px;
+    transition: max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+                height     0.38s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
   }
 
+  /* expanded: ۷۰٪ ارتفاع صفحه — نقشه ۳۰٪ بالا پیداست */
   .bottom-sheet--expanded {
-    max-height: 85vh;
+    height: 72vh;
+    max-height: 72vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .bottom-sheet--expanded::-webkit-scrollbar { width: 4px; }
-  .bottom-sheet--expanded::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+  .bottom-sheet--expanded::-webkit-scrollbar { width: 3px; }
+  .bottom-sheet--expanded::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 2px; }
 
   /* دستگیره */
   .sheet-handle-area {
     cursor: pointer;
-    padding-top: 10px;
+    padding-top: 8px;
     flex-shrink: 0;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .sheet-handle {
-    width: 40px;
-    height: 4px;
-    background: #ddd;
+    width: 36px; height: 4px;
+    background: #d0d0d0;
     border-radius: 2px;
-    margin: 0 auto 8px;
+    margin: 0 auto 6px;
   }
 
-  /* محتوا */
+  /* preview — وقتی collapse است */
+  .sheet-preview {
+    padding-bottom: 6px;
+  }
+
+  /* محتوای sheet */
   .sheet-content {
-    padding-top: 8px;
+    padding-top: 4px;
+    /* اطمینان از scroll صحیح */
+    flex: 1;
+    min-height: 0;
   }
 }
 </style>

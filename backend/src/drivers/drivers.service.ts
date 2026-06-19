@@ -96,7 +96,7 @@ export class DriversService {
   // ─── Driver: My trips ─────────────────────────────────────────────────────
   async getMyTrips(driverId: string): Promise<Booking[]> {
     return this.bookingRepo.find({
-      where: { 'driverId': driverId },
+      where: { driverId },
       order: { scheduledAt: 'DESC' },
       relations: ['user'],
     });
@@ -129,4 +129,37 @@ export class DriversService {
   private generateOtp(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
+  // ─── Driver: Update own trip status ─────────────────────────────────────────
+  // Driver can only:
+  //   confirmed   → in_progress  (سوار کردن مسافر)
+  //   in_progress → completed    (رسیدن به مقصد)
+  async updateTripStatus(
+    driverId: string,
+    bookingId: string,
+    status: string,
+  ): Promise<Booking> {
+    const booking = await this.bookingRepo.findOne({
+      where: { id: bookingId, driverId },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('این سفر برای شما یافت نشد');
+    }
+
+    const allowed: Record<string, string> = {
+      confirmed:   'in_progress',
+      in_progress: 'completed',
+    };
+
+    if (allowed[booking.status] !== status) {
+      throw new BadRequestException(
+        `تغییر وضعیت از ${booking.status} به ${status} مجاز نیست`,
+      );
+    }
+
+    (booking as any).status = status;
+    return this.bookingRepo.save(booking);
+  }
 }
+
+  

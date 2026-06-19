@@ -51,6 +51,17 @@ export class DriversController {
     return this.driversService.getMyTrip(driver.id, bookingId);
   }
 
+  // Driver updates own trip status (confirmed→in_progress, in_progress→completed)
+  @Patch('me/trips/:bookingId/status')
+  @UseGuards(JwtAuthGuard)
+  updateTripStatus(
+    @CurrentUser() driver: any,
+    @Param('bookingId') bookingId: string,
+    @Body('status') status: string,
+  ) {
+    return this.driversService.updateTripStatus(driver.id, bookingId, status);
+  }
+
   // ─── Admin: CRUD ──────────────────────────────────────────────────────────
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
