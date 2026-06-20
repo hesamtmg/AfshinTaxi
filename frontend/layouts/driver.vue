@@ -84,3 +84,8 @@ const logout = () => {
   navigateTo('/driver/login')
 }
 </script>
+<style>
+.flex-col{
+  flex-direction: column;
+}
+</style>

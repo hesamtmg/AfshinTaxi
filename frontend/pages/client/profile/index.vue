@@ -237,7 +237,7 @@
               <v-alert v-if="infoError" type="error" variant="tonal" rounded="lg" density="compact" class="mb-4" :text="infoError" />
               <v-alert v-if="infoSuccess" type="success" variant="tonal" rounded="lg" density="compact" class="mb-4" text="اطلاعات با موفقیت ذخیره شد." />
 
-              <div class="d-flex gap-3">
+              <div class="d-flex gap-3 flex-col">
                 <v-btn variant="outlined" color="secondary" @click="cancelEditInfo">انصراف</v-btn>
                 <v-btn
                   type="submit"

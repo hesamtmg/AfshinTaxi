@@ -54,7 +54,7 @@
 
           <div class="text-center">
             <div class="text-caption text-grey mb-3">مشتری یا ادمین هستید؟</div>
-            <div class="d-flex gap-3 justify-center">
+            <div class="d-flex gap-3 flex-col justify-center">
               <v-btn variant="outlined" size="small" color="secondary" to="/auth/login">
                 ورود مشتری
               </v-btn>

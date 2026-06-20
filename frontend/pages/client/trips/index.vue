@@ -170,7 +170,7 @@
             </div>
           </div>
           <v-divider class="my-3" />
-          <div class="d-flex gap-3">
+          <div class="d-flex gap-3 flex-col">
             <v-chip size="small" color="secondary" variant="tonal">
               <v-icon start size="12">mdi-car</v-icon>
               {{ selectedBooking.driver.carModel }}
@@ -350,7 +350,7 @@
             text="رزرو با موفقیت ویرایش شد."
           />
 
-          <div class="d-flex gap-3">
+          <div class="d-flex gap-3 flex-col">
             <v-btn variant="outlined" color="secondary" @click="editDialog = false">انصراف</v-btn>
             <v-btn
               type="submit"
@@ -393,7 +393,7 @@
           variant="outlined"
           class="mb-4"
         />
-        <div class="d-flex gap-3">
+        <div class="d-flex gap-3 flex-col">
           <v-btn variant="outlined" color="secondary" block @click="cancelDialog = false">نگه داشتن</v-btn>
           <v-btn color="error" block :loading="cancelling" @click="doCancel">لغو رزرو</v-btn>
         </div>

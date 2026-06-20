@@ -88,3 +88,8 @@ const logout = () => {
   navigateTo('/auth/admin-login')
 }
 </script>
+<style>
+.flex-col{
+  flex-direction: column;
+}
+</style>

@@ -338,7 +338,7 @@
                 <div class="text-body-2 text-grey">{{ trip.user?.phone }}</div>
               </div>
             </div>
-            <div class="d-flex gap-3">
+            <div class="d-flex gap-3 flex-col">
               <v-btn color="success" variant="tonal" prepend-icon="mdi-phone" block :href="`tel:${trip.user?.phone}`">
                 تماس
               </v-btn>

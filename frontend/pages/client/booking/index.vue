@@ -347,7 +347,7 @@
     </div>
 
     <!-- راهنمای نقشه — فقط دسکتاپ -->
-    <div class="map-legend pa-2 d-flex gap-3 align-center">
+    <div class="map-legend pa-2 d-flex gap-3 flex-col align-center">
       <div v-if="form.pickupAddress" class="d-flex align-center gap-1">
         <v-icon color="success" size="16">mdi-circle</v-icon>
         <span class="text-caption text-grey">سوار شدن</span>
@@ -385,7 +385,7 @@
             <span class="text-caption font-weight-bold text-primary">{{ formatToman(estimatedFare) }}</span>
           </div>
         </v-card>
-        <div class="d-flex gap-3 flex-column">
+        <div class="d-flex gap-3 flex-col flex-column">
           <v-btn variant="outlined" color="secondary" to="/client/trips" block>مشاهده سفرهای من</v-btn>
           <v-btn color="primary" block @click="resetForm">رزرو جدید</v-btn>
         </div>

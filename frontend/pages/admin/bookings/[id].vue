@@ -413,7 +413,7 @@
             :text="assignError"
           />
 
-          <div class="d-flex gap-3">
+          <div class="d-flex gap-3 flex-col ">
             <v-btn variant="outlined" color="secondary" block @click="assignDialog = false">انصراف</v-btn>
             <v-btn
               color="primary"

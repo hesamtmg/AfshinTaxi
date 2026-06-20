@@ -195,7 +195,7 @@
 
           <v-alert v-if="formError" type="error" variant="tonal" rounded="lg" class="mb-4" :text="formError" />
 
-          <div class="d-flex gap-3 mt-2" style="flex-direction:column">
+          <div class="d-flex gap-3 flex-col mt-2" style="flex-direction:column">
             <v-btn variant="outlined" color="secondary" block @click="formDialog = false">لغو</v-btn>
             <v-btn type="submit" color="primary" block :loading="formLoading" :disabled="!formValid">
               {{ editingDriver ? 'ذخیره تغییرات' : 'افزودن راننده' }}
@@ -213,7 +213,7 @@
         <div class="text-body-2 text-grey mb-5">
           <strong>{{ deleteTarget?.fullName }}</strong> به طور کامل حذف خواهد شد.
         </div>
-        <div class="d-flex gap-3">
+        <div class="d-flex gap-3 flex-col">
           <v-btn variant="outlined" color="secondary" block @click="deleteDialog = false">لغو</v-btn>
           <v-btn color="error" block :loading="deleting" @click="doDelete">حذف</v-btn>
         </div>

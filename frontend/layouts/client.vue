@@ -71,3 +71,7 @@ const logout = () => {
   navigateTo('/auth/login')
 }
 </script>
+<style>
+.flex-col{
+  flex-direction: column;
+}</style>

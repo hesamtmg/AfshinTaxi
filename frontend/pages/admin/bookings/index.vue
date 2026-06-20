@@ -321,7 +321,7 @@
             class="mb-5"
           />
 
-          <div class="d-flex gap-3">
+          <div class="d-flex gap-3 flex-col">
             <v-btn variant="outlined" color="secondary" block @click="assignDialog = false">لغو</v-btn>
             <v-btn
               color="primary"
