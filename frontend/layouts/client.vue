@@ -19,7 +19,8 @@
           <v-menu>
             <template #activator="{ props }">
               <v-avatar v-bind="props" color="primary" size="36" class="cursor-pointer mr-2">
-                <span class="text-body-2 font-weight-bold text-white">
+                <v-img v-if="authStore.user?.avatarUrl" :src="avatarSrc" cover />
+                <span v-else class="text-body-2 font-weight-bold text-white">
                   {{ authStore.user?.fullName?.charAt(0) }}
                 </span>
               </v-avatar>
@@ -66,12 +67,17 @@
 
 <script setup lang="ts">
 const authStore = useAuthStore()
+const config   = useRuntimeConfig()
+
+const avatarSrc = computed(() => {
+  const url = authStore.user?.avatarUrl
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  return `${config.public.apiBase.replace('/api', '')}${url}`
+})
+
 const logout = () => {
   authStore.logout()
   navigateTo('/auth/login')
 }
 </script>
-<style>
-.flex-col{
-  flex-direction: column;
-}</style>

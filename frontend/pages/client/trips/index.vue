@@ -162,7 +162,8 @@
           <div class="text-caption text-grey mb-2 font-weight-bold">راننده شما</div>
           <div class="d-flex align-center gap-3">
             <v-avatar color="primary" size="48">
-              <v-icon color="white">mdi-account</v-icon>
+                <v-img v-if="selectedBooking.driver?.avatarUrl" :src="avatarSrc(selectedBooking.driver?.avatarUrl)" cover />
+              <v-icon v-else color="white">mdi-account</v-icon>
             </v-avatar>
             <div>
               <div class="text-body-1 font-weight-bold text-secondary">{{ selectedBooking.driver.fullName }}</div>
@@ -559,6 +560,12 @@ const doCancel = async () => {
   } finally {
     cancelling.value = false
   }
+}
+const avatarSrc = (url: string) => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  const base = useRuntimeConfig().public.apiBase.replace('/api', '')
+  return `${base}${url}`
 }
 </script>
 

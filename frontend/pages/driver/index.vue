@@ -37,7 +37,7 @@
         <v-col v-for="stat in statCards" :key="stat.label" cols="6" md="3">
           <v-card rounded="xl" class="pa-5">
             <div class="d-flex align-center justify-space-between mb-3">
-              <v-avatar :color="stat.color" size="44" rounded="lg">
+              <v-avatar  :color="stat.color" size="44" rounded="lg">
                 <v-icon color="white" size="22">{{ stat.icon }}</v-icon>
               </v-avatar>
             </div>
@@ -115,6 +115,7 @@
             <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">پروفایل من</div>
             <div class="d-flex align-center gap-3 mb-4">
               <v-avatar color="primary" size="56">
+                <v-img v-if="driverStore.driver?.avatarUrl" :src="avatarSrc(driverStore.driver?.avatarUrl)" cover />
                 <span class="text-h5 font-weight-bold text-white">
                   {{ driverStore.driver?.fullName?.charAt(0) }}
                 </span>
@@ -214,6 +215,14 @@ const upcomingTrips = computed(() =>
 
 const statusColor = (s: string) =>
   ({ pending: 'warning', confirmed: 'info', in_progress: 'primary', completed: 'success', cancelled: 'error' }[s] || 'grey')
+
+
+  const avatarSrc = (url: string) => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  const base = useRuntimeConfig().public.apiBase.replace('/api', '')
+  return `${base}${url}`
+}
 </script>
 
 <style scoped>

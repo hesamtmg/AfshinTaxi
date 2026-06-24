@@ -36,7 +36,8 @@
                 size="38"
                 class="cursor-pointer mr-2"
               >
-                <span class="text-body-2 font-weight-bold text-white">
+              <v-img v-if="driverStore.driver?.avatarUrl" :src="avatarSrc(driverStore.driver?.avatarUrl)" cover />
+                <span v-else class="text-body-2 font-weight-bold text-white">
                   {{ driverStore.driver?.fullName?.charAt(0) }}
                 </span>
               </v-avatar>
@@ -82,6 +83,12 @@ const navItems = [
 const logout = () => {
   driverStore.logout()
   navigateTo('/driver/login')
+}
+const avatarSrc = (url: string) => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  const base = useRuntimeConfig().public.apiBase.replace('/api', '')
+  return `${base}${url}`
 }
 </script>
 <style>

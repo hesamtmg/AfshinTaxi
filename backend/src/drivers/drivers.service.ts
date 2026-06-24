@@ -72,7 +72,7 @@ export class DriversService {
   async verifyOtp(phone: string, otp: string): Promise<{ token: string; driver: any }> {
     const driver = await this.driverRepo.findOne({
       where: { phone },
-      select: ['id', 'fullName', 'phone', 'email', 'status', 'carModel', 'carPlate', 'carColor', 'carYear', 'licenseNumber', 'otpCode', 'otpExpiresAt'] as any,
+      select: ['id','avatarUrl', 'fullName', 'phone', 'email', 'status', 'carModel', 'carPlate', 'carColor', 'carYear', 'licenseNumber', 'otpCode', 'otpExpiresAt'] as any,
     });
 
     if (!driver) throw new NotFoundException('Driver not found');

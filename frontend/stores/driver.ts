@@ -11,6 +11,7 @@ interface Driver {
   carColor?: string
   carYear?: string
   licenseNumber?: string
+  avatarUrl?: string
 }
 
 export const useDriverStore = defineStore('driver', {

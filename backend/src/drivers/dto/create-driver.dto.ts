@@ -9,4 +9,5 @@ export class CreateDriverDto {
   @IsString() @IsOptional() carColor?: string;
   @IsString() @IsOptional() carYear?: string;
   @IsString() @IsOptional() licenseNumber?: string;
+    @IsString() @IsOptional() avatarUrl?: string;
 }

@@ -8,6 +8,7 @@ import { DriversModule } from './drivers/drivers.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { SettingsModule } from './settings/settings.module';
 import { SmsModule } from './sms/sms.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { SmsModule } from './sms/sms.module';
     BookingsModule,
     SettingsModule,
     SmsModule,
+    UploadModule,
   ],
 })
 export class AppModule {}

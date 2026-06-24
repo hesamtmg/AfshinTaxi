@@ -16,11 +16,17 @@
 
           <!-- Avatar card -->
           <v-card rounded="xl" class="pa-6 text-center mb-4">
-            <v-avatar color="primary" size="80" class="mb-4">
-              <span class="text-h3 font-weight-bold text-white">
-                {{ authStore.user?.fullName?.charAt(0) }}
-              </span>
-            </v-avatar>
+            <AvatarUpload
+              v-model="authStore.user.avatarUrl"
+              :initials="authStore.user?.fullName?.charAt(0)"
+              :token="authStore.token"
+              endpoint="/upload/avatar/me"
+              :size="80"
+              color="primary"
+              show-label
+              class="mb-4"
+              @uploaded="onAvatarUploaded"
+            />
             <div class="text-h6 font-weight-bold text-secondary mb-1">
               {{ authStore.user?.fullName }}
             </div>
@@ -237,7 +243,7 @@
               <v-alert v-if="infoError" type="error" variant="tonal" rounded="lg" density="compact" class="mb-4" :text="infoError" />
               <v-alert v-if="infoSuccess" type="success" variant="tonal" rounded="lg" density="compact" class="mb-4" text="اطلاعات با موفقیت ذخیره شد." />
 
-              <div class="d-flex gap-3 flex-col">
+              <div class="d-flex gap-3">
                 <v-btn variant="outlined" color="secondary" @click="cancelEditInfo">انصراف</v-btn>
                 <v-btn
                   type="submit"
@@ -429,6 +435,20 @@ const saveInfo = async () => {
     savingInfo.value = false
   }
 }
+
+// ── Avatar ────────────────────────────────────────────────────────────────────
+const avatarUrl = ref(authStore.user?.avatarUrl || '')
+
+const onAvatarUploaded = (updatedUser: any) => {
+  // Update auth store with new avatarUrl
+  authStore.setAuth(authStore.token!, {
+    ...authStore.user!,
+    avatarUrl: updatedUser.avatarUrl,
+  })
+  avatarUrl.value = updatedUser.avatarUrl
+}
+
+
 
 // ── Logout ────────────────────────────────────────────────────────────────────
 const logout = () => {
