@@ -5,6 +5,7 @@
         <div class="text-h5 font-weight-bold text-secondary">رزروها</div>
         <div class="text-body-2 text-grey">مدیریت همه رزروهای مشتریان</div>
       </div>
+          <v-btn color="warning" prepend-icon="mdi-star"   :to="`/admin/bookings/ratings`" >مدیریت امتیازات سفرها</v-btn>
     </div>
 
     <v-card rounded="xl" class="mb-4 pa-1">
@@ -288,7 +289,7 @@
                   :style="selectedDriverId === driver.id ? 'border:2px solid #F5A623' : 'border:2px solid transparent'"
                   @click="selectedDriverId = driver.id"
                 >
-                  <div class="d-flex align-center gap-3">
+                  <div class="d-flex  gap-3">
                     <v-radio :value="driver.id" hide-details />
                     <v-avatar color="info" size="40">
                       <v-icon color="white" size="20">mdi-account-tie</v-icon>
