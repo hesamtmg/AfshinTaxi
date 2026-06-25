@@ -56,6 +56,9 @@ export class Driver {
   @OneToMany(() => Booking, (booking) => booking.driver)
   bookings: Booking[];
 
+  @Column({ nullable: true })
+  rating: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

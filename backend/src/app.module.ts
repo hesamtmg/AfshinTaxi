@@ -9,6 +9,9 @@ import { BookingsModule } from './bookings/bookings.module';
 import { SettingsModule } from './settings/settings.module';
 import { SmsModule } from './sms/sms.module';
 import { UploadModule } from './upload/upload.module';
+import { RewardsModule } from './rewards/rewards.module';
+import { CustomerRewardsModule } from './customer-rewards/customer-rewards.module';
+import { RatingsModule } from './rating/ratings.module';
 
 @Module({
   imports: [
@@ -40,6 +43,10 @@ import { UploadModule } from './upload/upload.module';
     SettingsModule,
     SmsModule,
     UploadModule,
+    RewardsModule,
+    CustomerRewardsModule,
+    RatingsModule
+
   ],
 })
 export class AppModule {}
