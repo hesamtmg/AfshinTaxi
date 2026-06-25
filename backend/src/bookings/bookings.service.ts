@@ -21,7 +21,36 @@ export class BookingsService {
     private readonly settingsService: SettingsService,
     private readonly smsService: SmsService,
   ) {}
+  async getPublicStatus(id: string): Promise<any> {
+    const booking = await this.bookingRepo
+      .createQueryBuilder('booking')
+      .leftJoinAndSelect('booking.driver', 'driver')
+      .where('booking.id = :id', { id })
+      .getOne();
 
+    if (!booking) throw new NotFoundException('رزرو یافت نشد');
+
+    // Return only what a guest needs to see — no personal user data
+    return {
+      id:             booking.id,
+      status:         booking.status,
+      scheduledAt:    booking.scheduledAt,
+      pickupAddress:  booking.pickupAddress,
+      dropoffAddress: booking.dropoffAddress,
+      distanceKm:     booking.distanceKm,
+      estimatedFare:  booking.estimatedFare,
+      finalFare:      booking.finalFare,
+      passengerCount: booking.passengerCount,
+      createdAt:      booking.createdAt,
+      driver: booking.driver ? {
+        fullName:  booking.driver.fullName,
+        carModel:  booking.driver.carModel,
+        carPlate:  booking.driver.carPlate,
+        carColor:  booking.driver.carColor,
+        avatarUrl: booking.driver.avatarUrl,
+      } : null,
+    };
+  }
   // ─── Client: Create booking ──────────────────────────────────────────────────
   async create(userId: string, dto: CreateBookingDto): Promise<Booking> {
     const farePerKm = await this.settingsService.getFarePerKm();

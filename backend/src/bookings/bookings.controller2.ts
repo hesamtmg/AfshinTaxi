@@ -14,39 +14,30 @@ import { AssignDriverDto } from './dto/assign-driver.dto';
 import { BookingStatus } from './entities/booking.entity';
 
 @Controller('bookings')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
-  // ─── PUBLIC: Trip status by booking ID (no auth) ─────────────────────────
-  @Get('track/:id')
-  trackBooking(@Param('id') id: string) {
-    return this.bookingsService.getPublicStatus(id);
-  }
-
-  // ─── Client routes ────────────────────────────────────────────────────────
+  // ─── Client routes ───────────────────────────────────────────────────────────
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
   create(@CurrentUser() user: User, @Body() dto: CreateBookingDto) {
     return this.bookingsService.create(user.id, dto);
   }
 
   @Get('my')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
   getMyBookings(@CurrentUser() user: User) {
     return this.bookingsService.findMyBookings(user.id);
   }
 
   @Get('my/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
   getMyBooking(@CurrentUser() user: User, @Param('id') id: string) {
     return this.bookingsService.findOne(id, user.id);
   }
 
   @Patch('my/:id/edit')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
   editBooking(
     @CurrentUser() user: User,
@@ -57,7 +48,6 @@ export class BookingsController {
   }
 
   @Patch('my/:id/cancel')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
   cancelBooking(
     @CurrentUser() user: User,
@@ -67,44 +57,39 @@ export class BookingsController {
     return this.bookingsService.cancel(id, user.id, reason);
   }
 
-  // ─── Admin routes ─────────────────────────────────────────────────────────
+  // ─── Admin routes ────────────────────────────────────────────────────────────
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   findAll(@Query('status') status?: BookingStatus) {
     return this.bookingsService.findAll({ status });
   }
 
   @Get('stats')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   getStats() {
     return this.bookingsService.getStats();
   }
 
+  // ── New: get available drivers for a time slot ────────────────────────────
   @Get('available-drivers')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   getAvailableDrivers(@Query('scheduledAt') scheduledAt: string) {
     return this.bookingsService.getAvailableDrivers(scheduledAt);
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   findOne(@Param('id') id: string) {
     return this.bookingsService.findOne(id);
   }
 
   @Patch(':id/assign-driver')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   assignDriver(@Param('id') id: string, @Body() dto: AssignDriverDto) {
     return this.bookingsService.assignDriver(id, dto);
   }
 
   @Patch(':id/status')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   updateStatus(@Param('id') id: string, @Body('status') status: BookingStatus) {
     return this.bookingsService.updateStatus(id, status);
