@@ -26,6 +26,12 @@ export class DriversController {
     return this.driversService.verifyOtp(phone, otp);
   }
 
+  // ─── PUBLIC: Get driver location for a booking (used by tracking page) ────
+  @Get('location/booking/:bookingId')
+  getDriverLocationForBooking(@Param('bookingId') bookingId: string) {
+    return this.driversService.getDriverLocationForBooking(bookingId);
+  }
+
   // ─── Driver: Own routes ───────────────────────────────────────────────────
   @Get('me')
   @UseGuards(JwtAuthGuard)
@@ -51,7 +57,6 @@ export class DriversController {
     return this.driversService.getMyTrip(driver.id, bookingId);
   }
 
-  // Driver updates own trip status (confirmed→in_progress, in_progress→completed)
   @Patch('me/trips/:bookingId/status')
   @UseGuards(JwtAuthGuard)
   updateTripStatus(
@@ -60,6 +65,18 @@ export class DriversController {
     @Body('status') status: string,
   ) {
     return this.driversService.updateTripStatus(driver.id, bookingId, status);
+  }
+
+  // ─── Driver: Send current GPS location ────────────────────────────────────
+  @Patch('me/location')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  updateLocation(
+    @CurrentUser() driver: any,
+    @Body('lat') lat: number,
+    @Body('lng') lng: number,
+  ) {
+    return this.driversService.updateLocation(driver.id, lat, lng);
   }
 
   // ─── Admin: CRUD ──────────────────────────────────────────────────────────

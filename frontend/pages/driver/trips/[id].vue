@@ -9,14 +9,24 @@
         <div class="d-flex align-center justify-space-between flex-wrap gap-3">
           <div>
             <h1 class="text-h4 font-weight-bold text-secondary">سفر #{{ trip?.id?.slice(0, 8).toUpperCase() }}</h1>
-            <p class="text-body-2 text-grey mt-1">
-              {{ trip ? new Date(trip.scheduledAt).toLocaleString('fa-IR') : '' }}
-            </p>
+            <p class="text-body-2 text-grey mt-1">{{ trip ? new Date(trip.scheduledAt).toLocaleString('fa-IR') : '' }}</p>
           </div>
-          <v-chip v-if="trip" :color="statusColor(trip.status)" size="large" label>
-            <v-icon start>{{ statusIcon(trip.status) }}</v-icon>
-            {{ statusLabel(trip.status) }}
-          </v-chip>
+          <div class="d-flex align-center gap-2">
+            <!-- Live location indicator -->
+            <v-chip
+              v-if="isTrackingActive"
+              color="success"
+              size="small"
+              variant="tonal"
+            >
+              <div class="live-dot ml-1" />
+              موقعیت ارسال می‌شود
+            </v-chip>
+            <v-chip v-if="trip" :color="statusColor(trip.status)" size="large" label>
+              <v-icon start>{{ statusIcon(trip.status) }}</v-icon>
+              {{ statusLabel(trip.status) }}
+            </v-chip>
+          </div>
         </div>
       </v-container>
     </div>
@@ -52,7 +62,7 @@
             </div>
           </v-card>
 
-          <!-- ── Navigation Card ── -->
+          <!-- Navigation Card -->
           <v-card rounded="xl" class="pa-5 mb-4">
             <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">
               <v-icon color="primary" class="ml-2">mdi-navigation</v-icon>
@@ -60,131 +70,48 @@
             </div>
 
             <!-- Group 1: به مبدأ -->
-            <div class="nav-group mb-3">
-              <div class="nav-group-label mb-2">
+            <div class="mb-3">
+              <div class="d-flex align-center mb-2">
                 <v-icon color="success" size="16" class="ml-1">mdi-circle</v-icon>
-                <span class="text-caption font-weight-bold text-grey">رفتن به مبدأ (سوار کردن مسافر)</span>
+                <span class="text-caption font-weight-bold text-grey">رفتن به مبدأ</span>
               </div>
               <div class="d-flex gap-2 flex-wrap">
-                <v-btn
-                  size="small"
-                  color="success"
-                  variant="tonal"
-                  :href="googleMapsUrl('pickup')"
-                  target="_blank"
-                  prepend-icon="mdi-google-maps"
-                >
-                  گوگل مپ
-                </v-btn>
-                <v-btn
-                  size="small"
-                  color="info"
-                  variant="tonal"
-                  :href="wazeUrl('pickup')"
-                  target="_blank"
-                  prepend-icon="mdi-navigation"
-                >
-                  ویز
-                </v-btn>
-                <v-btn
-                  size="small"
-                  color="primary"
-                  variant="tonal"
-                  :href="neshanUrl('pickup')"
-                  target="_blank"
-                  prepend-icon="mdi-map"
-                >
-                  نشان
-                </v-btn>
+                <v-btn size="small" color="success" variant="tonal" :href="googleMapsUrl('pickup')" target="_blank" prepend-icon="mdi-google-maps">گوگل مپ</v-btn>
+                <v-btn size="small" color="info"    variant="tonal" :href="wazeUrl('pickup')"      target="_blank" prepend-icon="mdi-navigation">ویز</v-btn>
+                <v-btn size="small" color="primary" variant="tonal" :href="neshanUrl('pickup')"    target="_blank" prepend-icon="mdi-map">نشان</v-btn>
               </div>
             </div>
-
             <v-divider class="my-3" />
 
             <!-- Group 2: به مقصد -->
-            <div class="nav-group mb-3">
-              <div class="nav-group-label mb-2">
+            <div class="mb-3">
+              <div class="d-flex align-center mb-2">
                 <v-icon color="error" size="16" class="ml-1">mdi-map-marker</v-icon>
-                <span class="text-caption font-weight-bold text-grey">رفتن به مقصد (پیاده کردن مسافر)</span>
+                <span class="text-caption font-weight-bold text-grey">رفتن به مقصد</span>
               </div>
               <div class="d-flex gap-2 flex-wrap">
-                <v-btn
-                  size="small"
-                  color="success"
-                  variant="tonal"
-                  :href="googleMapsUrl('dropoff')"
-                  target="_blank"
-                  prepend-icon="mdi-google-maps"
-                >
-                  گوگل مپ
-                </v-btn>
-                <v-btn
-                  size="small"
-                  color="info"
-                  variant="tonal"
-                  :href="wazeUrl('dropoff')"
-                  target="_blank"
-                  prepend-icon="mdi-navigation"
-                >
-                  ویز
-                </v-btn>
-                <v-btn
-                  size="small"
-                  color="primary"
-                  variant="tonal"
-                  :href="neshanUrl('dropoff')"
-                  target="_blank"
-                  prepend-icon="mdi-map"
-                >
-                  نشان
-                </v-btn>
+                <v-btn size="small" color="success" variant="tonal" :href="googleMapsUrl('dropoff')" target="_blank" prepend-icon="mdi-google-maps">گوگل مپ</v-btn>
+                <v-btn size="small" color="info"    variant="tonal" :href="wazeUrl('dropoff')"       target="_blank" prepend-icon="mdi-navigation">ویز</v-btn>
+                <v-btn size="small" color="primary" variant="tonal" :href="neshanUrl('dropoff')"     target="_blank" prepend-icon="mdi-map">نشان</v-btn>
               </div>
             </div>
-
             <v-divider class="my-3" />
 
-            <!-- Group 3: مبدأ به مقصد -->
-            <div class="nav-group">
-              <div class="nav-group-label mb-2">
+            <!-- Group 3: مسیر کامل -->
+            <div>
+              <div class="d-flex align-center mb-2">
                 <v-icon color="primary" size="16" class="ml-1">mdi-routes</v-icon>
                 <span class="text-caption font-weight-bold text-grey">مسیر کامل (مبدأ به مقصد)</span>
               </div>
               <div class="d-flex gap-2 flex-wrap">
-                <v-btn
-                  size="small"
-                  color="success"
-                  variant="tonal"
-                  :href="googleMapsUrl('full')"
-                  target="_blank"
-                  prepend-icon="mdi-google-maps"
-                >
-                  گوگل مپ
-                </v-btn>
-                <v-btn
-                  size="small"
-                  color="info"
-                  variant="tonal"
-                  :href="wazeUrl('full')"
-                  target="_blank"
-                  prepend-icon="mdi-navigation"
-                >
-                  ویز
-                </v-btn>
-                <v-btn
-                  size="small"
-                  color="primary"
-                  variant="tonal"
-                  :href="neshanUrl('full')"
-                  target="_blank"
-                  prepend-icon="mdi-map"
-                >
-                  نشان
-                </v-btn>
+                <v-btn size="small" color="success" variant="tonal" :href="googleMapsUrl('full')" target="_blank" prepend-icon="mdi-google-maps">گوگل مپ</v-btn>
+                <v-btn size="small" color="info"    variant="tonal" :href="wazeUrl('full')"       target="_blank" prepend-icon="mdi-navigation">ویز</v-btn>
+                <v-btn size="small" color="primary" variant="tonal" :href="neshanUrl('full')"     target="_blank" prepend-icon="mdi-map">نشان</v-btn>
               </div>
             </div>
           </v-card>
 
-          <!-- Trip info -->
+          <!-- Trip Info -->
           <v-card rounded="xl" class="pa-6 mb-4">
             <div class="text-subtitle-1 font-weight-bold text-secondary mb-4">اطلاعات سفر</div>
             <v-row>
@@ -214,20 +141,18 @@
                 <v-list density="compact" class="pa-0">
                   <v-list-item prepend-icon="mdi-calendar-clock" class="px-0">
                     <template #title><span class="text-caption text-grey">زمان سفر</span></template>
-                    <template #subtitle>
-                      <span class="font-weight-medium">{{ new Date(trip.scheduledAt).toLocaleString('fa-IR') }}</span>
-                    </template>
+                    <template #subtitle><span class="font-weight-medium">{{ new Date(trip.scheduledAt).toLocaleString('fa-IR') }}</span></template>
                   </v-list-item>
                   <v-list-item prepend-icon="mdi-map-marker-distance" class="px-0">
                     <template #title><span class="text-caption text-grey">مسافت</span></template>
                     <template #subtitle>{{ trip.distanceKm }} کیلومتر</template>
                   </v-list-item>
                   <v-list-item prepend-icon="mdi-account-group" class="px-0">
-                    <template #title><span class="text-caption text-grey">تعداد مسافران</span></template>
+                    <template #title><span class="text-caption text-grey">مسافران</span></template>
                     <template #subtitle>{{ trip.passengerCount || 1 }} نفر</template>
                   </v-list-item>
                   <v-list-item v-if="trip.notes" prepend-icon="mdi-note-text" class="px-0">
-                    <template #title><span class="text-caption text-grey">یادداشت مسافر</span></template>
+                    <template #title><span class="text-caption text-grey">یادداشت</span></template>
                     <template #subtitle>{{ trip.notes }}</template>
                   </v-list-item>
                 </v-list>
@@ -236,60 +161,31 @@
           </v-card>
         </v-col>
 
-        <!-- Right: Fare + Customer + Actions + Timeline -->
+        <!-- Right: Actions + Fare + Customer + Timeline -->
         <v-col cols="12" md="5">
 
-          <!-- ── Trip Action Button ── -->
-          <!-- Confirmed → can start trip -->
-          <v-card
-            v-if="trip.status === 'confirmed'"
-            color="primary"
-            rounded="xl"
-            class="pa-5 mb-4"
-          >
+          <!-- Start trip action -->
+          <v-card v-if="trip.status === 'confirmed'" color="primary" rounded="xl" class="pa-5 mb-4">
             <div class="text-white text-body-2 opacity-80 mb-2">مسافر آماده سوار شدن است</div>
             <div class="text-white text-h6 font-weight-bold mb-4">آیا مسافر را سوار کردید؟</div>
-            <v-btn
-              color="white"
-              size="large"
-              block
-              :loading="updatingStatus"
-              @click="startTrip"
-            >
+            <v-btn color="white" size="large" block :loading="updatingStatus" @click="startTrip">
               <v-icon start color="primary">mdi-car</v-icon>
               <span class="text-primary font-weight-bold">شروع سفر</span>
             </v-btn>
           </v-card>
 
-          <!-- In progress → can complete trip -->
-          <v-card
-            v-else-if="trip.status === 'in_progress'"
-            color="success"
-            rounded="xl"
-            class="pa-5 mb-4"
-          >
+          <!-- Complete trip action -->
+          <v-card v-else-if="trip.status === 'in_progress'" color="success" rounded="xl" class="pa-5 mb-4">
             <div class="text-white text-body-2 opacity-80 mb-2">سفر در حال انجام است</div>
             <div class="text-white text-h6 font-weight-bold mb-4">آیا به مقصد رسیدید؟</div>
-            <v-btn
-              color="white"
-              size="large"
-              block
-              :loading="updatingStatus"
-              @click="completeTrip"
-            >
+            <v-btn color="white" size="large" block :loading="updatingStatus" @click="completeTrip">
               <v-icon start color="success">mdi-flag-checkered</v-icon>
               <span class="text-success font-weight-bold">پایان سفر</span>
             </v-btn>
           </v-card>
 
           <!-- Completed -->
-          <v-card
-            v-else-if="trip.status === 'completed'"
-            color="success"
-            variant="tonal"
-            rounded="xl"
-            class="pa-5 mb-4"
-          >
+          <v-card v-else-if="trip.status === 'completed'" color="success" variant="tonal" rounded="xl" class="pa-5 mb-4">
             <div class="d-flex align-center gap-3">
               <v-icon color="success" size="40">mdi-check-circle</v-icon>
               <div>
@@ -299,15 +195,44 @@
             </div>
           </v-card>
 
+          <!-- Location tracking status -->
+          <v-card
+            v-if="['confirmed','in_progress'].includes(trip.status)"
+            :color="locationError ? 'error' : 'grey-lighten-5'"
+            :variant="locationError ? 'tonal' : 'flat'"
+            rounded="xl"
+            class="pa-4 mb-4"
+          >
+            <div class="d-flex align-center gap-3">
+              <v-icon :color="isTrackingActive ? 'success' : 'grey'" size="24">
+                {{ isTrackingActive ? 'mdi-crosshairs-gps' : 'mdi-crosshairs-off' }}
+              </v-icon>
+              <div class="flex-1">
+                <div class="text-body-2 font-weight-bold" :class="isTrackingActive ? 'text-success' : 'text-grey'">
+                  {{ isTrackingActive ? 'ردیابی زنده فعال' : 'ردیابی غیرفعال' }}
+                </div>
+                <div class="text-caption text-grey">
+                  {{ locationError || (isTrackingActive ? 'موقعیت شما هر ۵ ثانیه ارسال می‌شود' : 'دسترسی به GPS لازم است') }}
+                </div>
+              </div>
+              <v-btn
+                v-if="!isTrackingActive"
+                size="small"
+                color="primary"
+                variant="tonal"
+                @click="startTracking"
+              >
+                فعال‌سازی
+              </v-btn>
+            </div>
+          </v-card>
+
           <!-- Fare -->
           <v-card color="secondary" rounded="xl" class="pa-5 mb-4 text-white">
             <div class="text-body-2 opacity-80 mb-1">کرایه سفر</div>
-            <div class="text-h2 font-weight-bold text-primary mb-1">
-              {{ formatToman(trip.finalFare || trip.estimatedFare) }}
-            </div>
+            <div class="text-h2 font-weight-bold text-primary mb-1">{{ formatToman(trip.finalFare || trip.estimatedFare) }}</div>
             <div class="text-caption opacity-70 mb-4">
-              {{ trip.distanceKm }} کیلومتر ·
-              {{ trip.finalFare ? 'کرایه نهایی توسط ادمین' : 'کرایه تخمینی' }}
+              {{ trip.distanceKm }} کیلومتر · {{ trip.finalFare ? 'کرایه نهایی' : 'تخمینی' }}
             </div>
             <v-divider color="white" opacity="0.15" class="mb-4" />
             <v-row dense>
@@ -338,13 +263,9 @@
                 <div class="text-body-2 text-grey">{{ trip.user?.phone }}</div>
               </div>
             </div>
-            <div class="d-flex gap-3 flex-col">
-              <v-btn color="success" variant="tonal" prepend-icon="mdi-phone" block :href="`tel:${trip.user?.phone}`">
-                تماس
-              </v-btn>
-              <v-btn color="info" variant="tonal" prepend-icon="mdi-message" block :href="`sms:${trip.user?.phone}`">
-                پیامک
-              </v-btn>
+            <div class="d-flex gap-3">
+              <v-btn color="success" variant="tonal" prepend-icon="mdi-phone"   block :href="`tel:${trip.user?.phone}`">تماس</v-btn>
+              <v-btn color="info"    variant="tonal" prepend-icon="mdi-message" block :href="`sms:${trip.user?.phone}`">پیامک</v-btn>
             </div>
           </v-card>
 
@@ -356,35 +277,23 @@
                 v-for="(step, i) in timeline"
                 :key="step.status"
                 class="timeline-item"
-                :class="{
-                  done:      isStatusDone(step.status),
-                  active:    trip.status === step.status,
-                  cancelled: trip.status === 'cancelled' && step.status === 'cancelled',
-                }"
+                :class="{ done: isStatusDone(step.status), active: trip.status === step.status, cancelled: trip.status === 'cancelled' && step.status === 'cancelled' }"
               >
                 <div class="timeline-dot">
-                  <v-icon size="14" :color="dotColor(step.status)">
-                    {{ isStatusDone(step.status) ? 'mdi-check' : step.icon }}
-                  </v-icon>
+                  <v-icon size="14" :color="dotColor(step.status)">{{ isStatusDone(step.status) ? 'mdi-check' : step.icon }}</v-icon>
                 </div>
                 <div v-if="i < timeline.length - 1" class="timeline-line" />
                 <div class="timeline-content">
-                  <div class="text-body-2 font-weight-bold" :class="isStatusDone(step.status) ? 'text-secondary' : 'text-grey'">
-                    {{ step.label }}
-                  </div>
+                  <div class="text-body-2 font-weight-bold" :class="isStatusDone(step.status) ? 'text-secondary' : 'text-grey'">{{ step.label }}</div>
                   <div class="text-caption text-grey">{{ step.desc }}</div>
                 </div>
               </div>
             </div>
           </v-card>
 
-          <!-- Payment note -->
           <v-alert type="info" variant="tonal" rounded="xl">
             <div class="text-body-2 font-weight-bold mb-1">دریافت کرایه</div>
-            <div class="text-caption">
-              کرایه را به صورت نقدی از مسافر دریافت کنید.
-              {{ trip.finalFare ? 'مبلغ نهایی توسط ادمین تعیین شده.' : 'مبلغ تخمینی است — در صورت نیاز با ادمین هماهنگ کنید.' }}
-            </div>
+            <div class="text-caption">کرایه را به صورت نقدی از مسافر دریافت کنید.</div>
           </v-alert>
         </v-col>
       </v-row>
@@ -404,15 +313,24 @@ const config      = useRuntimeConfig()
 const trip           = ref<any>(null)
 const loading        = ref(true)
 const updatingStatus = ref(false)
+const isTrackingActive = ref(false)
+const locationError    = ref('')
 
-let neshanMap: any  = null
-let routeLayerAdded = false
+let neshanMap: any        = null
+let routeLayerAdded       = false
+let driverMarker: any     = null
+let locationTimer: any    = null
+let watchId: number | null = null
 
 onMounted(async () => {
   driverStore.hydrate()
   if (!driverStore.isAuthenticated) { navigateTo('/driver/login'); return }
   await fetchTrip()
   loadNeshanSDK()
+})
+
+onUnmounted(() => {
+  stopTracking()
 })
 
 async function fetchTrip() {
@@ -422,7 +340,81 @@ async function fetchTrip() {
       headers: { Authorization: `Bearer ${driverStore.token}` },
     })
     trip.value = data
+    // Auto-start tracking if trip is active
+    if (['confirmed', 'in_progress'].includes(trip.value?.status)) {
+      await nextTick()
+      startTracking()
+    }
   } finally { loading.value = false }
+}
+
+// ── Live location tracking ────────────────────────────────────────────────────
+const startTracking = () => {
+  if (!navigator.geolocation) {
+    locationError.value = 'مرورگر شما از GPS پشتیبانی نمی‌کند'
+    return
+  }
+
+  locationError.value = ''
+
+  // Get initial position immediately
+  navigator.geolocation.getCurrentPosition(
+    (pos) => sendLocation(pos.coords.latitude, pos.coords.longitude),
+    (err) => { locationError.value = 'دسترسی به GPS رد شد' },
+    { enableHighAccuracy: true, timeout: 10000 },
+  )
+
+  // Then send every 5 seconds
+  locationTimer = setInterval(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => sendLocation(pos.coords.latitude, pos.coords.longitude),
+      () => {},
+      { enableHighAccuracy: true, timeout: 5000 },
+    )
+  }, 5000)
+
+  isTrackingActive.value = true
+}
+
+const stopTracking = () => {
+  if (locationTimer) { clearInterval(locationTimer); locationTimer = null }
+  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null }
+  isTrackingActive.value = false
+}
+
+const sendLocation = async (lat: number, lng: number) => {
+  try {
+    await $api.patch('/drivers/me/location', { lat, lng }, {
+      headers: { Authorization: `Bearer ${driverStore.token}` },
+    })
+    // Update driver marker on map
+    updateDriverMarker(lat, lng)
+  } catch {}
+}
+
+const updateDriverMarker = (lat: number, lng: number) => {
+  if (!neshanMap) return
+  const nmp = (window as any).nmp_mapboxgl
+  if (!nmp) return
+
+  if (driverMarker) {
+    driverMarker.setLngLat([lng, lat])
+  } else {
+    // Create taxi-styled marker
+    const el = document.createElement('div')
+    el.innerHTML = `<div style="
+      background:#F5A623;
+      border:3px solid white;
+      border-radius:50%;
+      width:38px;height:38px;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 2px 12px rgba(0,0,0,0.3);
+      font-size:18px;
+    ">🚖</div>`
+    driverMarker = new nmp.Marker({ element: el, anchor: 'center' })
+      .setLngLat([lng, lat])
+      .addTo(neshanMap)
+  }
 }
 
 // ── Trip actions ──────────────────────────────────────────────────────────────
@@ -435,9 +427,9 @@ const startTrip = async () => {
       { headers: { Authorization: `Bearer ${driverStore.token}` } },
     )
     trip.value = { ...trip.value, status: data.status }
-  } catch (e: any) {
-    console.error('خطا در شروع سفر:', e)
-  } finally { updatingStatus.value = false }
+    startTracking()
+  } catch (e: any) { console.error(e) }
+  finally { updatingStatus.value = false }
 }
 
 const completeTrip = async () => {
@@ -449,18 +441,13 @@ const completeTrip = async () => {
       { headers: { Authorization: `Bearer ${driverStore.token}` } },
     )
     trip.value = { ...trip.value, status: data.status }
-    // Refresh to get latest data
+    stopTracking()
     await fetchTrip()
-  } catch (e: any) {
-    console.error('خطا در پایان سفر:', e)
-  } finally { updatingStatus.value = false }
+  } catch (e: any) { console.error(e) }
+  finally { updatingStatus.value = false }
 }
 
 // ── Navigation URLs ───────────────────────────────────────────────────────────
-// type: 'pickup' = navigate to pickup only
-//       'dropoff' = navigate to dropoff only
-//       'full' = full route pickup → dropoff
-
 const googleMapsUrl = (type: 'pickup' | 'dropoff' | 'full') => {
   if (!trip.value) return '#'
   const { pickupLat, pickupLng, dropoffLat, dropoffLng } = trip.value
@@ -473,10 +460,8 @@ const googleMapsUrl = (type: 'pickup' | 'dropoff' | 'full') => {
 const wazeUrl = (type: 'pickup' | 'dropoff' | 'full') => {
   if (!trip.value) return '#'
   const { pickupLat, pickupLng, dropoffLat, dropoffLng } = trip.value
-  // Waze only supports single destination navigation
   if (type === 'pickup')  return `https://waze.com/ul?ll=${pickupLat},${pickupLng}&navigate=yes`
   if (type === 'dropoff') return `https://waze.com/ul?ll=${dropoffLat},${dropoffLng}&navigate=yes`
-  // For full route: go to pickup first
   return `https://waze.com/ul?ll=${pickupLat},${pickupLng}&navigate=yes`
 }
 
@@ -489,7 +474,7 @@ const neshanUrl = (type: 'pickup' | 'dropoff' | 'full') => {
   return `${base}/?origin=${pickupLat},${pickupLng}&destination=${dropoffLat},${dropoffLng}`
 }
 
-// ── Neshan SDK ────────────────────────────────────────────────────────────────
+// ── Neshan Map ────────────────────────────────────────────────────────────────
 const loadNeshanSDK = () => {
   const loadLink = (href: string) => {
     if (document.querySelector(`link[href="${href}"]`)) return
@@ -513,16 +498,15 @@ const initMap = () => {
   const nmp = (window as any).nmp_mapboxgl
   if (!nmp) return
   neshanMap = new nmp.Map({
-    mapType:   nmp.Map.mapTypes.neshanVector,
+    mapType: nmp.Map.mapTypes.neshanVector,
     container: 'driver-trip-map',
-    zoom:      13,
-    center:   [trip.value.pickupLng, trip.value.pickupLat],
-    mapKey:    config.public.neshanWebKey,
-    poi:       true,
-    traffic:   false,
+    zoom: 13,
+    center: [trip.value.pickupLng, trip.value.pickupLat],
+    mapKey: config.public.neshanWebKey,
+    poi: true, traffic: false,
   })
   neshanMap.on('load', () => {
-    new nmp.Marker({ color: '#4CAF50' }).setLngLat([trip.value.pickupLng,  trip.value.pickupLat]).addTo(neshanMap)
+    new nmp.Marker({ color: '#4CAF50' }).setLngLat([trip.value.pickupLng, trip.value.pickupLat]).addTo(neshanMap)
     new nmp.Marker({ color: '#F44336' }).setLngLat([trip.value.dropoffLng, trip.value.dropoffLat]).addTo(neshanMap)
     drawRoute()
   })
@@ -531,7 +515,7 @@ const initMap = () => {
 const drawRoute = async () => {
   if (!trip.value) return
   try {
-    const res  = await fetch(
+    const res = await fetch(
       `https://api.neshan.org/v4/direction?type=car&origin=${trip.value.pickupLat},${trip.value.pickupLng}&destination=${trip.value.dropoffLat},${trip.value.dropoffLng}&alternative=false`,
       { headers: { 'Api-Key': config.public.neshanApiKey } },
     )
@@ -556,7 +540,7 @@ const drawRoute = async () => {
   } catch (e) { console.error('Route error', e) }
 }
 
-// ── Status ────────────────────────────────────────────────────────────────────
+// ── Status helpers ─────────────────────────────────────────────────────────────
 const timeline = [
   { status: 'pending',     label: 'تخصیص به شما',    icon: 'mdi-clock-outline',  desc: 'این سفر به شما تخصیص داده شده' },
   { status: 'confirmed',   label: 'تأیید شده',        icon: 'mdi-check-circle',   desc: 'سفر تأیید شد، مسافر مطلع شد' },
@@ -566,33 +550,25 @@ const timeline = [
 ]
 
 const statusOrder = ['pending', 'confirmed', 'in_progress', 'completed']
-
 const isStatusDone = (status: string) => {
   if (!trip.value) return false
   if (trip.value.status === 'cancelled') return status === 'cancelled'
   return statusOrder.indexOf(status) <= statusOrder.indexOf(trip.value.status)
 }
-
-const dotColor = (status: string) =>
-  isStatusDone(status) ? (status === 'cancelled' ? 'error' : 'success') : 'grey'
-
-const statusColor = (s: string) =>
-  ({ pending: 'warning', confirmed: 'info', in_progress: 'primary', completed: 'success', cancelled: 'error' }[s] || 'grey')
-
-const statusIcon = (s: string) =>
-  ({ pending: 'mdi-clock-outline', confirmed: 'mdi-check-circle', in_progress: 'mdi-car', completed: 'mdi-flag-checkered', cancelled: 'mdi-close-circle' }[s] || 'mdi-help-circle')
-
-const statusLabel = (s: string) =>
-  ({ pending: 'در انتظار', confirmed: 'تأیید شده', in_progress: 'در حال سفر', completed: 'انجام شده', cancelled: 'لغو شده' }[s] || s)
+const dotColor    = (s: string) => isStatusDone(s) ? (s === 'cancelled' ? 'error' : 'success') : 'grey'
+const statusColor = (s: string) => ({ pending: 'warning', confirmed: 'info', in_progress: 'primary', completed: 'success', cancelled: 'error' }[s] || 'grey')
+const statusIcon  = (s: string) => ({ pending: 'mdi-clock-outline', confirmed: 'mdi-check-circle', in_progress: 'mdi-car', completed: 'mdi-flag-checkered', cancelled: 'mdi-close-circle' }[s] || 'mdi-help-circle')
+const statusLabel = (s: string) => ({ pending: 'در انتظار', confirmed: 'تأیید شده', in_progress: 'در حال سفر', completed: 'انجام شده', cancelled: 'لغو شده' }[s] || s)
 </script>
 
 <style scoped>
 .driver-hero { background: linear-gradient(135deg, #fff8ee 0%, #ffffff 100%); border-bottom: 1px solid #f0f0f0; }
-.nav-group-label { display: flex; align-items: center; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: #4CAF50; animation: livePulse 1.5s infinite; display: inline-block; }
+@keyframes livePulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.6; transform:scale(1.3); } }
 .timeline { display: flex; flex-direction: column; }
 .timeline-item { display: flex; align-items: flex-start; gap: 14px; position: relative; padding-bottom: 20px; }
 .timeline-item:last-child { padding-bottom: 0; }
-.timeline-dot { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: #f5f5f5; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; z-index: 1; transition: all 0.3s; }
+.timeline-dot { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: #f5f5f5; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; z-index: 1; }
 .timeline-item.done .timeline-dot { background: #E8F5E9; border-color: #4CAF50; }
 .timeline-item.active .timeline-dot { background: #FFF8E1; border-color: #F5A623; box-shadow: 0 0 0 4px rgba(245,166,35,0.15); }
 .timeline-item.cancelled .timeline-dot { background: #FFEBEE; border-color: #F44336; }

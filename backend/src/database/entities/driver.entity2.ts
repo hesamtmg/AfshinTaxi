@@ -27,6 +27,7 @@ export class Driver {
   @Column({ type: 'enum', enum: DriverStatus, default: DriverStatus.ACTIVE })
   status: DriverStatus;
 
+  // Vehicle
   @Column()
   carModel: string;
 
@@ -45,25 +46,18 @@ export class Driver {
   @Column({ nullable: true })
   avatarUrl: string;
 
-  // 2FA OTP
+  // 2FA OTP fields
   @Column({ nullable: true, select: false })
   otpCode: string;
 
   @Column({ nullable: true })
   otpExpiresAt: Date;
 
-  // Live location tracking
-  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
-  currentLat: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
-  currentLng: number;
-
-  @Column({ nullable: true })
-  locationUpdatedAt: Date;
-
   @OneToMany(() => Booking, (booking) => booking.driver)
   bookings: Booking[];
+
+  @Column({ nullable: true })
+  rating: string;
 
   @CreateDateColumn()
   createdAt: Date;

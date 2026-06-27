@@ -90,8 +90,7 @@
                 <span v-if="driver.carColor" class="text-caption text-grey">({{ driver.carColor }})</span>
               </div>
               <div class="d-flex align-center gap-2 mb-4">
-                <v-icon size="16" color="grey">mdi-card-text</v-icon>
-                <span class="text-body-2 font-weight-bold text-primary">{{ driver.carPlate }}</span>
+               <IranLicensePlate :plate="driver.carPlate" />
               </div>
 
               <!-- Actions -->
@@ -158,7 +157,10 @@
           <div class="text-caption text-grey">{{ item.carColor }}</div>
         </template>
         <template #item.carPlate="{ item }">
-          <v-chip size="small" color="primary" variant="tonal">{{ item.carPlate }}</v-chip>
+          <div class="pa-2">
+         <IranLicensePlate  :plate="item.carPlate" />
+          </div>
+  
         </template>
         <template #item.status="{ item }">
           <v-chip :color="driverStatusColor(item.status)" size="small" label>{{ item.status }}</v-chip>
@@ -195,11 +197,12 @@
               <v-divider class="mb-2" />
               <div class="text-caption text-grey font-weight-bold mb-2">VEHICLE INFORMATION</div>
             </v-col>
-            <v-col cols="12" sm="6">
+            <v-col cols="12" sm="12">
               <v-text-field v-model="driverForm.carModel" label="Car Model" :rules="[rules.required]" prepend-inner-icon="mdi-car" />
             </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field v-model="driverForm.carPlate" label="License Plate" :rules="[rules.required]" prepend-inner-icon="mdi-card-text" />
+            <v-col cols="12" sm="12">
+              <IranLicensePlateInput  v-model="driverForm.carPlate"></IranLicensePlateInput>
+
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field v-model="driverForm.carColor" label="Car Color" prepend-inner-icon="mdi-palette" />
@@ -256,7 +259,10 @@
 </template>
 
 <script setup lang="ts">
+
 import AvatarUpload from '~/common/AvatarUpload.vue'
+import IranLicensePlateInput from '~/components/driver/IranLicensePlateInput.vue'
+import IranLicensePlate from '~/components/driver/IranLicensePlate.vue'
 definePageMeta({ layout: 'admin' })
 
 const { $api } = useNuxtApp()

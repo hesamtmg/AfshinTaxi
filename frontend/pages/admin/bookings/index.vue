@@ -156,7 +156,8 @@
               <div class="text-caption text-grey">{{ selectedBooking.driver.phone }}</div>
               <div class="d-flex gap-2 mt-1">
                 <v-chip size="x-small" color="secondary" variant="tonal">{{ selectedBooking.driver.carModel }}</v-chip>
-                <v-chip size="x-small" color="primary" variant="tonal">{{ selectedBooking.driver.carPlate }}</v-chip>
+                              <IranLicensePlate :plate=" selectedBooking.driver.carPlate" />
+
               </div>
             </div>
           </div>
@@ -296,7 +297,8 @@
                     </v-avatar>
                     <div class="flex-1">
                       <div class="text-body-2 font-weight-bold text-secondary">{{ driver.fullName }}</div>
-                      <div class="text-caption text-grey">{{ driver.carModel }} · {{ driver.carPlate }}</div>
+                      <div class="text-caption text-grey">{{ driver.carModel }} </div>
+                                <IranLicensePlate :plate=" driver.carPlate" />
                     </div>
                     <v-chip size="x-small" color="success">
                       <v-icon start size="10">mdi-check</v-icon>آزاد

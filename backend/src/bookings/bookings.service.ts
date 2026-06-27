@@ -20,7 +20,7 @@ export class BookingsService {
     private readonly driverRepo: Repository<Driver>,
     private readonly settingsService: SettingsService,
     private readonly smsService: SmsService,
-  ) {}
+  ) { }
   async getPublicStatus(id: string): Promise<any> {
     const booking = await this.bookingRepo
       .createQueryBuilder('booking')
@@ -28,25 +28,31 @@ export class BookingsService {
       .where('booking.id = :id', { id })
       .getOne();
 
+
+
     if (!booking) throw new NotFoundException('رزرو یافت نشد');
 
     // Return only what a guest needs to see — no personal user data
     return {
-      id:             booking.id,
-      status:         booking.status,
-      scheduledAt:    booking.scheduledAt,
-      pickupAddress:  booking.pickupAddress,
+      id: booking.id,
+      status: booking.status,
+      scheduledAt: booking.scheduledAt,
+      pickupAddress: booking.pickupAddress,
       dropoffAddress: booking.dropoffAddress,
-      distanceKm:     booking.distanceKm,
-      estimatedFare:  booking.estimatedFare,
-      finalFare:      booking.finalFare,
+      distanceKm: booking.distanceKm,
+      estimatedFare: booking.estimatedFare,
+      finalFare: booking.finalFare,
       passengerCount: booking.passengerCount,
-      createdAt:      booking.createdAt,
+      createdAt: booking.createdAt,
+      pickupLat: booking.pickupLat,
+      pickupLng: booking.pickupLng,
+      dropoffLat: booking.dropoffLat,
+      dropoffLng: booking.dropoffLng,
       driver: booking.driver ? {
-        fullName:  booking.driver.fullName,
-        carModel:  booking.driver.carModel,
-        carPlate:  booking.driver.carPlate,
-        carColor:  booking.driver.carColor,
+        fullName: booking.driver.fullName,
+        carModel: booking.driver.carModel,
+        carPlate: booking.driver.carPlate,
+        carColor: booking.driver.carColor,
         avatarUrl: booking.driver.avatarUrl,
       } : null,
     };
@@ -54,12 +60,12 @@ export class BookingsService {
   // ─── Client: Create booking ──────────────────────────────────────────────────
   async create(userId: string, dto: CreateBookingDto): Promise<Booking> {
     const farePerKm = await this.settingsService.getFarePerKm();
-    const baseFare  = parseFloat((await this.settingsService.get('base_fare')) || '0');
-    const minFare   = parseFloat((await this.settingsService.get('minimum_fare')) || '0');
+    const baseFare = parseFloat((await this.settingsService.get('base_fare')) || '0');
+    const minFare = parseFloat((await this.settingsService.get('minimum_fare')) || '0');
 
-    const distanceFare   = dto.distanceKm * farePerKm;
+    const distanceFare = dto.distanceKm * farePerKm;
     const calculatedFare = Math.max(baseFare + distanceFare, minFare);
-    const estimatedFare  = parseFloat(calculatedFare.toFixed(2));
+    const estimatedFare = parseFloat(calculatedFare.toFixed(2));
 
     const booking = this.bookingRepo.create({
       ...dto,
@@ -108,8 +114,8 @@ export class BookingsService {
     const deadlineMinutes = await this.settingsService.getCancellationDeadlineMinutes();
 
     if (deadlineMinutes > 0) {
-      const scheduledTime   = new Date(booking.scheduledAt).getTime();
-      const now             = Date.now();
+      const scheduledTime = new Date(booking.scheduledAt).getTime();
+      const now = Date.now();
       const minutesUntilTrip = (scheduledTime - now) / (1000 * 60);
 
       if (minutesUntilTrip < deadlineMinutes) {
@@ -120,7 +126,7 @@ export class BookingsService {
       }
     }
 
-    booking.status             = BookingStatus.CANCELLED;
+    booking.status = BookingStatus.CANCELLED;
     booking.cancellationReason = reason;
     return this.bookingRepo.save(booking);
   }
@@ -171,7 +177,7 @@ export class BookingsService {
     }
 
     booking.driverId = dto.driverId;
-    booking.status   = BookingStatus.CONFIRMED;
+    booking.status = BookingStatus.CONFIRMED;
     if (dto.finalFare) booking.finalFare = dto.finalFare;
 
     const saved = await this.bookingRepo.save(booking);
@@ -202,10 +208,10 @@ export class BookingsService {
     excludeBookingId?: string,
   ): Promise<Booking | null> {
     const bufferMinutes = await this.settingsService.getDriverBufferMinutes();
-    const bufferMs      = bufferMinutes * 60 * 1000;
+    const bufferMs = bufferMinutes * 60 * 1000;
 
     const windowStart = new Date(new Date(scheduledAt).getTime() - bufferMs);
-    const windowEnd   = new Date(new Date(scheduledAt).getTime() + bufferMs);
+    const windowEnd = new Date(new Date(scheduledAt).getTime() + bufferMs);
 
     const qb = this.bookingRepo
       .createQueryBuilder('booking')
@@ -227,11 +233,11 @@ export class BookingsService {
   // ─── Admin: Get available drivers for a time slot ─────────────────────────────
   async getAvailableDrivers(scheduledAt: string): Promise<Driver[]> {
     const bufferMinutes = await this.settingsService.getDriverBufferMinutes();
-    const bufferMs      = bufferMinutes * 60 * 1000;
-    const date          = new Date(scheduledAt);
+    const bufferMs = bufferMinutes * 60 * 1000;
+    const date = new Date(scheduledAt);
 
     const windowStart = new Date(date.getTime() - bufferMs);
-    const windowEnd   = new Date(date.getTime() + bufferMs);
+    const windowEnd = new Date(date.getTime() + bufferMs);
 
     // Find all driver IDs that are busy in this window
     const busyBookings = await this.bookingRepo
@@ -268,8 +274,8 @@ export class BookingsService {
 
   // ─── Admin: Stats ────────────────────────────────────────────────────────────
   async getStats() {
-    const total     = await this.bookingRepo.count();
-    const pending   = await this.bookingRepo.count({ where: { status: BookingStatus.PENDING } });
+    const total = await this.bookingRepo.count();
+    const pending = await this.bookingRepo.count({ where: { status: BookingStatus.PENDING } });
     const confirmed = await this.bookingRepo.count({ where: { status: BookingStatus.CONFIRMED } });
     const completed = await this.bookingRepo.count({ where: { status: BookingStatus.COMPLETED } });
     const cancelled = await this.bookingRepo.count({ where: { status: BookingStatus.CANCELLED } });
@@ -317,7 +323,7 @@ export class BookingsService {
     }
 
     if (dto.passengerCount !== undefined) booking.passengerCount = dto.passengerCount;
-    if (dto.notes          !== undefined) booking.notes          = dto.notes;
+    if (dto.notes !== undefined) booking.notes = dto.notes;
 
     return this.bookingRepo.save(booking);
   }

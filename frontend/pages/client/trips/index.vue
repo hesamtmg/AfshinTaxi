@@ -296,9 +296,8 @@
               <v-icon start size="12">mdi-car</v-icon>
               {{ selectedBooking.driver.carModel }}
             </v-chip>
-            <v-chip size="small" color="primary" variant="tonal">{{
-              selectedBooking.driver.carPlate
-            }}</v-chip>
+                <IranLicensePlate :plate=" selectedBooking.driver.carPlate" />
+        
           </div>
         </v-card>
 
@@ -423,6 +422,22 @@
               <div class="text-body-2">برای لغو با پشتیبانی تماس بگیرید.</div>
             </div>
           </v-card>
+        </div>
+          <div
+          v-if="selectedBooking.status === 'in_progress' || selectedBooking.status === 'confirmed' && selectedBooking.driver"
+          class="d-flex flex-column gap-2"
+        >
+          <v-btn
+            color="primary"
+            variant="tonal"
+            block
+            prepend-icon="mdi-pencil"
+            :to="'/track?id='+selectedBooking.id"
+          >
+            پیگیری لحظه‌ای
+          </v-btn>
+     
+     
         </div>
       </div>
     </v-navigation-drawer>
@@ -625,8 +640,10 @@
 </template>
 
 <script setup lang="ts">
+
 import { formatToman } from "~/utils/currency";
 import TripRatingDialog from "~/components/triprating/TripRatingDialog.vue";
+import IranLicensePlate from "~/components/driver/IranLicensePlate.vue";
 definePageMeta({ layout: "client" });
 
 const bookingsStore = useBookingsStore();

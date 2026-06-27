@@ -32,9 +32,8 @@
                 <v-icon start size="14">mdi-car</v-icon>
                 {{ driverStore.driver?.carModel }}
               </v-chip>
-              <v-chip size="small" color="secondary" variant="tonal">
-                {{ driverStore.driver?.carPlate }}
-              </v-chip>
+
+              <IranLicensePlate :plate="driverStore.driver?.carPlate" />
             </div>
           </div>
         </div>
@@ -126,7 +125,9 @@
 </template>
 
 <script setup lang="ts">
+
 import { formatToman } from '~/utils/currency'
+import IranLicensePlate from '~/components/driver/IranLicensePlate.vue'
 definePageMeta({ layout: 'driver' })
 
 const driverStore = useDriverStore()
