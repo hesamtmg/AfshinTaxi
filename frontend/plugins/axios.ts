@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(async (nuxtApp) => {
   const config = useRuntimeConfig()
   const authStore = useAuthStore()
 
@@ -11,8 +11,11 @@ export default defineNuxtPlugin((nuxtApp) => {
   console.log('API Base URL:', axiosConfig.baseURL)
   // Handle FormData in SSR context
   if (process.server) {
-    axiosConfig.httpAgent = require('http').globalAgent
-    axiosConfig.httpsAgent = require('https').globalAgent
+    // Dynamic import so these node: built-ins never end up in the client bundle
+    const { globalAgent: httpAgent } = await import('node:http')
+    const { globalAgent: httpsAgent } = await import('node:https')
+    axiosConfig.httpAgent = httpAgent
+    axiosConfig.httpsAgent = httpsAgent
     // Avoid FormData imports during SSR
     axiosConfig.maxRedirects = 5
   }
