@@ -1,0 +1,15 @@
+node_modules
+dist
+npm-debug.log*
+
+.env
+.env.*
+!.env.example
+
+# Persisted at runtime via a volume, not baked into the image
+uploads/*
+
+.git
+.gitignore
+.DS_Store
+*.md
