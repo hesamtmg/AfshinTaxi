@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { TripRating } from './entities/trip-rating.entity';
-import { Booking } from 'src/bookings/entities/booking.entity';
+import { Booking } from '../bookings/entities/booking.entity';
 
 @Injectable()
 export class RatingsService {

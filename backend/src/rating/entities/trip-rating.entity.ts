@@ -1,6 +1,6 @@
-import { Booking } from 'src/bookings/entities/booking.entity';
-import { Driver } from 'src/database/entities/driver.entity';
-import { User } from 'src/database/entities/user.entity';
+import { Booking } from '../../bookings/entities/booking.entity';
+import { Driver } from '../../database/entities/driver.entity';
+import { User } from '../../database/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
