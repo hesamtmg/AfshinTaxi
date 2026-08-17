@@ -73,8 +73,8 @@ const handleLogin = async () => {
   loading.value = true
   error.value = ''
   try {
-    await $api.post('/auth/login', { phone: phone.value })
-    authStore.setPendingPhone(phone.value)
+    const { data } = await $api.post('/auth/login', { phone: phone.value })
+    authStore.setPendingPhone(phone.value, data.devOtp)
     navigateTo('/auth/verify-otp')
   } catch (e: any) {
     error.value = e.response?.data?.message || 'ورود ناموفق بود'

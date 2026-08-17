@@ -93,8 +93,8 @@ const handleRegister = async () => {
   error.value = ''
 
   try {
-    await $api.post('/auth/register', fields)
-    authStore.setPendingPhone(fields.phone)
+    const { data } = await $api.post('/auth/register', fields)
+    authStore.setPendingPhone(fields.phone, data.devOtp)
     navigateTo('/auth/verify-otp')
   } catch (e: any) {
     error.value = e.response?.data?.message || 'ثبت نام ناموفق بود'

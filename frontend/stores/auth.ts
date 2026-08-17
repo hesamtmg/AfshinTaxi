@@ -15,6 +15,8 @@ interface AuthState {
   user: User | null
   token: string | null
   pendingPhone: string | null
+  // Dev-mode only: OTP echoed back by the API when NODE_ENV !== 'production'
+  pendingOtp: string | null
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -22,6 +24,7 @@ export const useAuthStore = defineStore('auth', {
     user: null,
     token: null,
     pendingPhone: null,
+    pendingOtp: null,
   }),
 
   getters: {
@@ -40,14 +43,16 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    setPendingPhone(phone: string) {
+    setPendingPhone(phone: string, otp?: string) {
       this.pendingPhone = phone
+      this.pendingOtp = otp || null
     },
 
     logout() {
       this.token        = null
       this.user         = null
       this.pendingPhone = null
+      this.pendingOtp   = null
       if (process.client) {
         localStorage.removeItem('auth_token')
         localStorage.removeItem('auth_user')

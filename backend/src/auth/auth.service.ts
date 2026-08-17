@@ -5,6 +5,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { User, UserRole } from '../database/entities/user.entity';
 import { SmsService } from '../sms/sms.service';
@@ -19,6 +20,7 @@ export class AuthService {
     private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly smsService: SmsService,
+    private readonly config: ConfigService,
   ) {}
 
   // ─── Client Registration (Step 1) ───────────────────────────────────────────
@@ -47,7 +49,7 @@ export class AuthService {
 
     await this.smsService.sendOtp(dto.phone, otp);
 
-    return { message: 'OTP sent to your phone number' };
+    return { message: 'OTP sent to your phone number', ...(this.isDev() && { devOtp: otp }) };
   }
 
   // ─── Verify OTP & Complete Registration (Step 2) ────────────────────────────
@@ -58,12 +60,15 @@ export class AuthService {
     });
 
     if (!user) throw new NotFoundException('User not found');
+    if (!user.otpCode) throw new BadRequestException('No OTP requested');
 
     if (new Date() > user.otpExpiresAt) {
       throw new BadRequestException('OTP has expired');
     }
 
-  
+    const isMatch = await bcrypt.compare(dto.otp, user.otpCode);
+    if (!isMatch) throw new BadRequestException('Invalid OTP');
+
     user.isVerified = true;
     user.otpCode = null;
     user.otpExpiresAt = null;
@@ -93,7 +98,7 @@ export class AuthService {
 
     await this.smsService.sendOtp(dto.phone, otp);
 
-    return { message: 'OTP sent to your phone number' };
+    return { message: 'OTP sent to your phone number', ...(this.isDev() && { devOtp: otp }) };
   }
 
   // ─── Admin Login (email + password) ─────────────────────────────────────────
@@ -116,6 +121,10 @@ export class AuthService {
   // ─── Helpers ─────────────────────────────────────────────────────────────────
   private generateOtp(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  private isDev(): boolean {
+    return this.config.get('NODE_ENV') !== 'production';
   }
 
   private signToken(user: Partial<User>): string {

@@ -19,6 +19,8 @@ export const useDriverStore = defineStore('driver', {
     driver:       null as Driver | null,
     token:        null as string | null,
     pendingPhone: null as string | null,
+    // Dev-mode only: OTP echoed back by the API when NODE_ENV !== 'production'
+    pendingOtp:   null as string | null,
     trips:        [] as any[],
     stats:        null as any,
     loading:      false,
@@ -38,14 +40,16 @@ export const useDriverStore = defineStore('driver', {
       }
     },
 
-    setPendingPhone(phone: string) {
+    setPendingPhone(phone: string, otp?: string) {
       this.pendingPhone = phone
+      this.pendingOtp = otp || null
     },
 
     logout() {
       this.token        = null
       this.driver       = null
       this.pendingPhone = null
+      this.pendingOtp   = null
       this.trips        = []
       this.stats        = null
       if (process.client) {
