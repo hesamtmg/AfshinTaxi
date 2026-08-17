@@ -29,3 +29,14 @@ USER nuxt
 EXPOSE 3001
 
 CMD ["node", ".output/server/index.mjs"]
+
+# ---- Static assets for nginx ----
+# Nitro's own static-file handler for /_nuxt/* can 500 with ENOENT: its
+# public-asset manifest stores paths relative to where its runtime chunk
+# ends up post-bundling (.output/server/chunks/nitro/), one directory
+# level off from the actual file location (.output/public/). Rather than
+# depend on that internal chunking behavior, nginx serves these hashed,
+# immutable build assets directly -- which is also the standard
+# high-performance pattern for Nuxt/Nitro in production regardless.
+FROM nginx:1.27-alpine AS static-assets
+COPY --from=builder /app/.output/public /usr/share/nginx/html

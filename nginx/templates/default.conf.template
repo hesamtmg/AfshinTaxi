@@ -36,6 +36,16 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
     }
 
+    # Content-hashed, immutable Nuxt build output -- served directly from
+    # disk (baked into this image, see frontend/Dockerfile's static-assets
+    # stage) instead of proxied to the Node process.
+    location /_nuxt/ {
+        root /usr/share/nginx/html;
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        access_log off;
+    }
+
     location / {
         proxy_pass http://frontend_upstream;
         proxy_http_version 1.1;
@@ -70,6 +80,13 @@ server {
 #     location /uploads/ {
 #         proxy_pass http://backend_upstream;
 #         proxy_set_header Host $host;
+#     }
+#
+#     location /_nuxt/ {
+#         root /usr/share/nginx/html;
+#         try_files $uri =404;
+#         add_header Cache-Control "public, max-age=31536000, immutable" always;
+#         access_log off;
 #     }
 #
 #     location / {
