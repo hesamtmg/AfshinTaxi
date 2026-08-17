@@ -77,7 +77,6 @@ export class AuthService {
   async login(dto: LoginDto) {
 
     const user = await this.userRepo.findOne({ where: { phone: dto.phone } });
-        console.log(dto.phone,user)
     if (!user || !user.isVerified) {
       throw new UnauthorizedException('Phone number not registered');
     }
@@ -107,8 +106,8 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Invalid credentials');
     if (!user.isActive) throw new UnauthorizedException('Account suspended');
 
-    // const isMatch = await bcrypt.compare(password, user.password);
-    // if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
     const token = this.signToken(user);
     return { token, user: this.sanitize(user) };

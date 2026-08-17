@@ -27,13 +27,14 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY package.json ./
+COPY docker-entrypoint.sh ./
 
 # Uploads dir is normally volume-mounted at runtime; create it so
 # useStaticAssets()/multer have somewhere to write before the volume attaches.
-RUN mkdir -p uploads && chown -R nestjs:nodejs /app
+RUN chmod +x docker-entrypoint.sh && mkdir -p uploads && chown -R nestjs:nodejs /app
 
 USER nestjs
 
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
