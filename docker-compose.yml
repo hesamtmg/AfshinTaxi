@@ -80,6 +80,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: runner
     container_name: afshintaxi-frontend
     restart: unless-stopped
     depends_on:
@@ -114,7 +115,10 @@ services:
         max-file: "3"
 
   nginx:
-    image: nginx:1.27-alpine
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: static-assets
     container_name: afshintaxi-nginx
     restart: unless-stopped
     depends_on:
