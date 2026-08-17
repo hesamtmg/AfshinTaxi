@@ -80,7 +80,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      target: runner
     container_name: afshintaxi-frontend
     restart: unless-stopped
     depends_on:
@@ -93,6 +92,8 @@ services:
       NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE}
       NUXT_PUBLIC_NESHAN_WEB_KEY: ${NUXT_PUBLIC_NESHAN_WEB_KEY}
       NUXT_PUBLIC_NESHAN_API_KEY: ${NUXT_PUBLIC_NESHAN_API_KEY}
+    volumes:
+      - frontend_static:/app/shared-public
     networks:
       - internal
     expose:
@@ -115,10 +116,7 @@ services:
         max-file: "3"
 
   nginx:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      target: static-assets
+    image: nginx:1.27-alpine
     container_name: afshintaxi-nginx
     restart: unless-stopped
     depends_on:
@@ -134,6 +132,7 @@ services:
     volumes:
       - ./nginx/templates:/etc/nginx/templates:ro
       - ./nginx/certs:/etc/letsencrypt:ro
+      - frontend_static:/usr/share/nginx/nuxt-assets:ro
     networks:
       - internal
     logging:
@@ -145,6 +144,7 @@ services:
 volumes:
   postgres_data:
   backend_uploads:
+  frontend_static:
 
 networks:
   internal:

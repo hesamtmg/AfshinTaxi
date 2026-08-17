@@ -37,10 +37,12 @@ server {
     }
 
     # Content-hashed, immutable Nuxt build output -- served directly from
-    # disk (baked into this image, see frontend/Dockerfile's static-assets
-    # stage) instead of proxied to the Node process.
+    # disk instead of proxied to the Node process. Read from the
+    # frontend_static volume the frontend container populates from its own
+    # .output/public on every start (see frontend/docker-entrypoint.sh), so
+    # this can never drift from what the frontend is actually running.
     location /_nuxt/ {
-        root /usr/share/nginx/html;
+        root /usr/share/nginx/nuxt-assets;
         try_files $uri =404;
         add_header Cache-Control "public, max-age=31536000, immutable" always;
         access_log off;
@@ -83,7 +85,7 @@ server {
 #     }
 #
 #     location /_nuxt/ {
-#         root /usr/share/nginx/html;
+#         root /usr/share/nginx/nuxt-assets;
 #         try_files $uri =404;
 #         add_header Cache-Control "public, max-age=31536000, immutable" always;
 #         access_log off;
