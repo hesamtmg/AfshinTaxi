@@ -31,13 +31,25 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     return config
   })
 
-  // Handle 401 globally
+  // Handle 401 globally -- redirect back to whichever portal's login page
+  // matches where the user actually is, instead of always bouncing to the
+  // customer login (e.g. a stale token after a DB reset was sending admins
+  // and drivers there too).
   api.interceptors.response.use(
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        authStore.logout()
-        navigateTo('/auth/login')
+        const path = useRoute().path
+        if (path.startsWith('/driver')) {
+          useDriverStore().logout()
+          navigateTo('/driver/login')
+        } else if (path.startsWith('/admin') || path.startsWith('/auth/admin')) {
+          authStore.logout()
+          navigateTo('/auth/admin-login')
+        } else {
+          authStore.logout()
+          navigateTo('/auth/login')
+        }
       }
       return Promise.reject(error)
     },
