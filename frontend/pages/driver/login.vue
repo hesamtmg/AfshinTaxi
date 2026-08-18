@@ -105,8 +105,8 @@ const handleLogin = async () => {
   loading.value = true
   error.value = ''
   try {
-    await $api.post('/drivers/auth/send-otp', { phone: phone.value })
-    driverStore.setPendingPhone(phone.value)
+    const { data } = await $api.post('/drivers/auth/send-otp', { phone: phone.value })
+    driverStore.setPendingPhone(phone.value, data.devOtp)
     navigateTo('/driver/verify-otp')
   } catch (e: any) {
     error.value = e.response?.data?.message || 'شماره تلفن یافت نشد. با ادمین تماس بگیرید.'

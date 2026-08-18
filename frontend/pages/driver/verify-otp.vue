@@ -19,6 +19,19 @@
         </div>
 
         <v-card rounded="xl" class="pa-6">
+          <!-- کد نمایشی حالت توسعه (SMS واقعی ارسال نمی‌شود) -->
+          <v-alert
+            v-if="driverStore.pendingOtp"
+            type="info"
+            variant="tonal"
+            rounded="lg"
+            class="mb-4"
+            style="cursor: pointer"
+            @click="fillOtp(driverStore.pendingOtp)"
+          >
+            حالت توسعه — کد: <strong>{{ driverStore.pendingOtp }}</strong> (برای پر کردن خودکار کلیک کنید)
+          </v-alert>
+
           <!-- ورودی کد -->
           <div class="d-flex justify-center gap-2 mb-6">
             <v-text-field
@@ -150,6 +163,11 @@ const handlePaste = (e: ClipboardEvent) => {
   else inputRefs.value[5]?.focus()
 }
 
+const fillOtp = (value: string | null) => {
+  if (!value) return
+  value.split('').forEach((ch, i) => { otpDigits.value[i] = ch })
+}
+
 const handleVerify = async () => {
   if (otp.value.length < 6 || loading.value) return
   loading.value = true
@@ -171,7 +189,8 @@ const handleVerify = async () => {
 
 const handleResend = async () => {
   try {
-    await $api.post('/drivers/auth/send-otp', { phone: driverStore.pendingPhone })
+    const { data } = await $api.post('/drivers/auth/send-otp', { phone: driverStore.pendingPhone })
+    driverStore.pendingOtp = data.devOtp || null
     otpDigits.value = Array(6).fill('')
     inputRefs.value[0]?.focus()
     error.value = ''

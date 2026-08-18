@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, NotFoundException, BadRequestExcepti
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { Driver } from '../database/entities/driver.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
@@ -16,6 +17,7 @@ export class DriversService {
     private readonly bookingRepo: Repository<Booking>,
     private readonly jwtService: JwtService,
     private readonly smsService: SmsService,
+    private readonly config: ConfigService,
   ) {}
 
   // ─── Admin: CRUD ──────────────────────────────────────────────────────────
@@ -64,7 +66,7 @@ export class DriversService {
     await this.driverRepo.save(driver);
 
     await this.smsService.sendOtp(phone, otp);
-    return { message: 'OTP sent to your phone number' };
+    return { message: 'OTP sent to your phone number', ...(this.isDev() && { devOtp: otp }) };
   }
 
   // ─── Driver Auth: Step 2 — Verify OTP ─────────────────────────────────────
@@ -79,8 +81,8 @@ export class DriversService {
     if (!(driver as any).otpCode) throw new BadRequestException('No OTP requested');
     if (new Date() > (driver as any).otpExpiresAt) throw new BadRequestException('OTP expired');
 
-    // const isMatch = await bcrypt.compare(otp, (driver as any).otpCode);
-    // if (!isMatch) throw new BadRequestException('Invalid OTP');
+    const isMatch = await bcrypt.compare(otp, (driver as any).otpCode);
+    if (!isMatch) throw new BadRequestException('Invalid OTP');
 
     (driver as any).otpCode = null;
     (driver as any).otpExpiresAt = null;
@@ -182,5 +184,9 @@ export class DriversService {
 
   private generateOtp(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  private isDev(): boolean {
+    return this.config.get('NODE_ENV') !== 'production';
   }
 }

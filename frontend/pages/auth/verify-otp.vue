@@ -13,6 +13,19 @@
         </div>
 
         <v-card rounded="xl" class="pa-6">
+          <!-- کد نمایشی حالت توسعه (SMS واقعی ارسال نمی‌شود) -->
+          <v-alert
+            v-if="authStore.pendingOtp"
+            type="info"
+            variant="tonal"
+            rounded="lg"
+            class="mb-4"
+            style="cursor: pointer"
+            @click="fillOtp(authStore.pendingOtp)"
+          >
+            حالت توسعه — کد: <strong>{{ authStore.pendingOtp }}</strong> (برای پر کردن خودکار کلیک کنید)
+          </v-alert>
+
           <!-- ورودی کد -->
           <div class="d-flex justify-center gap-2 mb-6">
             <v-text-field
@@ -100,6 +113,11 @@ const handlePaste = (e: ClipboardEvent) => {
   }
 }
 
+const fillOtp = (value: string | null) => {
+  if (!value) return
+  value.split('').forEach((ch, i) => { otpDigits.value[i] = ch })
+}
+
 const handleVerify = async () => {
   loading.value = true
   error.value = ''
@@ -118,7 +136,8 @@ const handleVerify = async () => {
 }
 
 const handleResend = async () => {
-  await $api.post('/auth/login', { phone: authStore.pendingPhone })
+  const { data } = await $api.post('/auth/login', { phone: authStore.pendingPhone })
+  authStore.pendingOtp = data.devOtp || null
   resendCooldown.value = 60
   const timer = setInterval(() => {
     resendCooldown.value--
